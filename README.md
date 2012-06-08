@@ -1,4 +1,4 @@
-Cursesow
+Cursow
 ========
 
 A NCurses Warsow Server Browser
