@@ -31,6 +31,14 @@ import socket	# for network byte translations
 ###################
 #
 # Constants
+FLAG_PASSWORD = 1
+FLAG_ANTICHEAT = 1<<1
+FLAG_FRIENDLY_FIRE = 1<<2
+FLAG_ANTILAG = 1<<3
+FLAG_BOTS = 1<<4
+FLAG_PURE = 1<<5
+FLAG_INSTAGIB = 1<<6
+FLAG_TIMEOUT = 1<<30
 
 ###################
 #
@@ -45,8 +53,18 @@ import socket	# for network byte translations
 # get turned into
 #	'server xxxx yeah yeah'
 
+def safeint( a, b=0 ):
+	try: return int(a)
+	except ValueError: return b
+
 def removeWhitespace( s ) :
 	return re.sub(r'\s\s+', ' ', s)
+
+def ip_str_int( i ):
+	ss = i.split('.')
+	if len(ss) != 4:
+		raise Exception( 'ip_str_int: ip not in 4 parts %s' % i )
+	return ((int(ss[0])*256+int(ss[1]))*256+int(ss[2]))*256+int(ss[3])
 
 def ip_int_str( i ):
 	return "%d.%d.%d.%d" % ( ((i>>24)&0xff), (i>>16)&0xff, (i>>8)&0xff, (i&0xff) )
@@ -104,8 +122,34 @@ class Socket(object):
 
 	def get2( self, bufsize=4096):
 		if self._blocking:
-			pass
-			##### TODO`
+			# simple case, timeout/exceptions handled on socket-side
+
+			r, ip = self._socket.recvfrom( bufsize )
+			self._lastData = time.time()
+			return ( r, ip_tuple_int_s(ip) )
+		# else:
+		# through case
+		try:
+			r, ip = self._socket.recvfrom( bufsize )
+			self._lastData = time.time()
+			return ( r, ip_tuple_int_s(ip) )
+		except socket.error as err:
+			if ( err.errno == errno.EWOULDBLOCK ):
+				if( time.time() - self._lastData >= self._timeout ):
+					raise socket.timeout()
+				return ( None, None )
+			# other problem re-raise
+			raise err
+	
+	# socket compat
+	def close(self):
+		self._socket.close()
+
+	def fileno(self):
+		return self._socket.fileno()
+
+	def bind(self, addr):
+		self._socket.bind(addr)
 
 # query class
 
@@ -197,7 +241,7 @@ class WarsowProtocol:
 
 	def sendPacket( soc, packet, addr ):
 		try:
-			if isinstance(s, Socket):
+			if isinstance(soc, Socket):
 				soc.send( packet, addr )
 			else:
 				soc.sendto( packet, ip_int_tuple_s(addr) )
@@ -206,10 +250,10 @@ class WarsowProtocol:
 			# log.error( "cutepig.net.sendPacket: socket.error %d %s (ip %s)" % ( err.errno, err.strerror, ip_int_tuple_s(addr) ) )
 	
 	def getResponse2( soc, bufsize=4096 ):
-		if isinstance(s, Socket):
-			return s.get2( bufsize )
+		if isinstance(soc, Socket):
+			return soc.get2( bufsize )
 		else:
-			r, ip = s.recvfrom( bufsize )
+			r, ip = soc.recvfrom( bufsize )
 			return ( r, ip_tuple_int_s(ip) )
 
 	###############################################
@@ -260,7 +304,8 @@ class WarsowProtocol:
 		
 		# now its list of [ key, value, key, value.. ]
 		if ( len(split) & 1 ) :
-			log.log( "uneven amount in rules?" )
+			#log.log( "uneven amount in rules?" )
+			pass
 			
 		# key\\value\\key\\value[0x0a]
 		rules = {}
@@ -529,7 +574,7 @@ class WarsowProtocol:
 			return False
 		query.incoming += len ( r )
 		if ( addr != query.addr ) :
-			log.log( "Warning: getting response2 from different address??" )
+			#log.log( "Warning: getting response2 from different address??" )
 			return False
 	
 		# quake doesnt need no stinking stages
@@ -542,7 +587,7 @@ class WarsowProtocol:
 		if ( len(query.buffers) ) :
 			ofs = self.checkServerResponse ( query.buffers[0], query.isfull )
 			if ( ofs == -1 ) :
-				log.log( "getInfos, malicious packet from %s" % ( ip_int_str_full(query.addr) ) )
+				#log.log( "getInfos, malicious packet from %s" % ( ip_int_str_full(query.addr) ) )
 				# if ( not return_timeouts ) :
 				#	return None
 				info = { 'addr' : query.addr, 'error' : 1 }
@@ -594,19 +639,19 @@ class WarsowProtocol:
 				return False
 			query.incoming += len ( r )
 			if ( addr != query.addr ) :
-				log.log( "Warning: getting response2 from different address??" )
+				#log.log( "Warning: getting response2 from different address??" )
 				return False
 			
 			ofs = self.checkMasterResponse ( r )
 			if ( ofs == -1 ) :
-				log.log( "Malicious packet from master %s" % ( self.ip_int_str_full(query,addr) ) )
+				#log.log( "Malicious packet from master %s" % ( self.ip_int_str_full(query,addr) ) )
 				query.error = True
 				return True
 				
 			# master server query stores the ip's in the buffer directly
 			ips = self.parseMasterResponse ( r[ofs:] )
 			if ( not len(ips) ) :
-				log.log( "Empty ip list from master %s %s" % ( self.ip_int_str_full(query.addr), r ) )
+				#log.log( "Empty ip list from master %s %s" % ( self.ip_int_str_full(query.addr), r ) )
 				return True	# dont take as error?
 				
 			else :
@@ -615,7 +660,8 @@ class WarsowProtocol:
 				
 		except socket.timeout :
 			if ( not len(query.buffers) ) :
-				log.log( "Master server %s timeouted" % ( self.ip_int_str_full(query.addr) ) )
+				#log.log( "Master server %s timeouted" % ( self.ip_int_str_full(query.addr) ) )
+				pass
 				
 			return True	# we can stop now (quake specific: timeout=no more data)
 			
@@ -666,7 +712,7 @@ class WarsowProtocol:
 	def parseServerResponse ( self, buf, isfull ) :
 		ls = buf.split ( '\x0a' )
 		if ( len(ls) < 1 ) :
-			log.log( 'empty server response??\n%s' % buf )
+			#log.log( 'empty server response??\n%s' % buf )
 			return None
 			
 		rules = self.getRules ( ls[0] )
@@ -690,5 +736,7 @@ class WarsowProtocol:
 ###################
 #
 # Main
+if __name__ == '__main__':
+	wsw = WarsowProtocol()
 
 # vim: set fdm=indent ts=4 sw=4 noexpandtab: #
