@@ -1,15 +1,16 @@
 #!/usr/bin/python2
-import curses, threading
+import curses, threading, re
 from pywsw import *
 from curses import panel
 
-class WARSOW(object):
+class WARSOW(object): ## {{{
 	MASTERSERVERS = ['dpmaster.deathmask.net']
 	PORT = 27950
 	PROTOCOL = 12
 	OPTIONS = 'full empty'
+## }}}
 
-class statusBar(object):
+class statusBar(object): ## {{{
 	def __init__(self):
 		self.win = curses.newwin(1, curses.COLS, curses.LINES-1, 0) 
 		self.pan = panel.new_panel(self.win)
@@ -17,13 +18,13 @@ class statusBar(object):
 		self.win.clrtoeol()
 	
 	def disp(self, msg):
-		self.win.clrtoeol()
+		self.win.clrtobot()
 		self.win.addstr(0,0, msg[:curses.COLS])
 		panel.update_panels()
 		curses.doupdate()
+## }}}
 
-
-class serverList(object):
+class serverList(object): ## {{{
 	cols = ['png', 'plyrs', 'map', 'mod', 'name']
 	showcol = ['png', 'plyrs', 'map', 'mod', 'name']
 
@@ -33,21 +34,29 @@ class serverList(object):
 		self.win.bkgdset(ord(' '), curses.color_pair(12))
 		self.win.clrtobot()
 		self.items = []
+		self.key = 'name'
 	
 	def add(self, server):
 		self.items.append(server)
+		#self.sort()
 		self.disp()
+
+	def sort(self):
+		sortkey = lambda x: re.sub('\^[0-9]', '', x.name)
+		self.items = sorted(self.items, key=sortkey)
 	
 	def disp(self):
 		for n in xrange(len(self.items)):
 			if n > curses.COLS-3:
 				break
 			server = self.items[n]
-			self.win.addstr(n,0,server.name)
+			name = re.sub(r'\^[0-9]', '', server.name)
+			self.win.addstr(n,0,name)
 		panel.update_panels()
 		curses.doupdate()
+## }}}
 
-class Application(object):
+class Application(object): ## {{{
 	colors = False
 	serverips = set()
 
@@ -72,19 +81,24 @@ class Application(object):
 			panel.update_panels()
 			curses.doupdate()
 
+		self.killThread = False
 		self.serverThread = threading.Thread(target=self.processServers)
 		self.serverThread.start()
 		
 		while True:
 			key = screen.getch()
 			if key == ord('q'):
+				self.killThread = True
+				self.serverThread.join()
 				break
 			if key == curses.KEY_RESIZE:
 				#TODO
 				pass
 
-	def processServers(self):
+	def processServers(self): ##{{{
 		for ip in self.serverips:
+			if self.killThread:
+				break
 			self.status.disp('Querying Server: %s' % ip)
 			host = ip.split(':')
 			try:
@@ -96,13 +110,17 @@ class Application(object):
 				# TODO handle exception
 				continue
 		self.status.disp('done')
+		## }}}
 
 	def initColors(self): ## {{{
 		if not curses.can_change_color() or curses.COLORS < 10:
 			return
 		curses.use_default_colors()
 		for n in range(5):
-			curses.init_color(n, 1000*(1&n), 1000*(2&n), 1000*(4&n))
+			r = 1000 if 1&n else 0
+			g = 1000 if 2&n else 0
+			b = 1000 if 4&n else 0
+			curses.init_color(n, r, g, b)
 		curses.init_color(5,   0,1000,1000)
 		curses.init_color(6,1000,   0,1000)
 		curses.init_color(7,1000,1000,1000)
@@ -122,6 +140,8 @@ class Application(object):
 			self.colors[n]   = curses.color_pair(n+2)
 			self.hlcolors[n] = curses.color_pair(n+13)
 		## }}}
+## }}}
+
 
 if __name__=='__main__':
 	curses.wrapper( Application )
