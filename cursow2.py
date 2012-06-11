@@ -25,8 +25,6 @@ class statusBar(object): ## {{{
 ## }}}
 
 class serverList(object): ## {{{
-	cols = ['png', 'plyrs', 'map', 'mod', 'name']
-	showcol = ['png', 'plyrs', 'map', 'mod', 'name']
 
 	def __init__(self):
 		self.win = curses.newwin(curses.LINES-3, curses.COLS-2, 1,1)
@@ -46,10 +44,50 @@ class serverList(object): ## {{{
 		self.items = sorted(self.items, key=sortkey)
 	
 	def disp(self):
+		self.win.clrtobot()
+		colwidth = [ 3, 5, int(0.1*(curses.COLS-8)), int(0.1*(width-8)), int(0.2(width-8)), int(0.6(width-8)) ]
+		colstart = [ sum(colwidth[0:n])+n for n in xrange(len(colwidth)) ]
+		color = self.colors(1)
+		self.win.addstr(0, colwidth[0],'png')
+		self.win.addstr(0, colwidth[1],'plyrs')
+		self.win.addstr(0, colwidth[2],'gametype'[:colwidth[2]])
+		self.win.addstr(0, colwidth[3],'map'[:colwidth[3]])
+		self.win.addstr(0, colwidth[4],'mod'[:colwidth[4]])
+		self.win.addstr(0, colwidth[5],'name'[:colwidth[5]])
+
+		y = 1
+		for server in self.items:
+			if y >= curses.COLS-3:
+				break
+			color = self.colors(1)
+			self.win.addstr(y, colwidth[0],'000')
+			self.win.addstr(y, colwidth[1], '%02d/%02d' % ( server.clients , server.maxclients ) )
+			self.win.addstr(y, colwidth[2], server.gametype[:colwidth[2]])
+			self.win.addstr(y, colwidth[3], server.map[:colwidth[3]])
+			self.win.addstr(y, colwidth[4], server.mod[:colwidth[4]])
+
+			name = re.split(r'(\^.)', server.name)
+			w = colwidth[5]
+			wm = curses.COLS-3-w
+			while wm > 0:
+				for part in name:
+					if part[0] == '^':
+						try:
+							color = self.colors(int(part[1]))
+						except:
+							self.win.addstr(y, w, part[:wm])
+							w += len(part)
+							wm -= len(part)
+					else:
+						self.win.addstr(y, w, part[:wm])
+						w += len(part)
+						wm -= len(part)
+			y += 1
+
 		for n in xrange(len(self.items)):
 			if n > curses.COLS-3:
 				break
-			server = self.items[n]
+
 			name = re.sub(r'\^[0-9]', '', server.name)
 			self.win.addstr(n,0,name)
 		panel.update_panels()

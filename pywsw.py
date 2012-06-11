@@ -489,7 +489,8 @@ def MasterServer(host, port=27950, protocol=12, options="full empty", timeout=1)
     ##     filter_allow_full ? "full" : "",
     ##     filter_allow_empty ? "empty" : "" );
 
-    data = master.command( "getservers Warsow %d %s" % ( protocol, options), raw=True )
+    #data = master.command( "getservers Warsow %d %s" % ( protocol, options), raw=True )
+    data = master.command( "getservers Warsow %d %d %s" % ( protocol, protocol-1, "" ), raw=True )
     for pos in range(22, len(data)-7, 7):
         sdata = data[pos:pos+7]
         if sdata.startswith("\\"):
