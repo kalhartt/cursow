@@ -75,7 +75,7 @@ class Connection(object): ##{{{
         """
         Send given data as a properly formatted packet.
         """
-        self.socket.send("%s%s\n" % (Connection.PACKET_PREFIX, data)) ##}}}
+        self.socket.send("%s%s" % (Connection.PACKET_PREFIX, data)) ##}}}
 
     def receive(self, raw=False): ##{{{
         """
@@ -490,7 +490,7 @@ def MasterServer(host, port=27950, protocol=12, options="full empty", timeout=1)
     ##     filter_allow_empty ? "empty" : "" );
 
     #data = master.command( "getservers Warsow %d %s" % ( protocol, options), raw=True )
-    data = master.command( "getservers Warsow %d %d %s" % ( protocol, protocol-1, "" ), raw=True )
+    data = master.command( "getservers Warsow %d %d %s" % ( protocol, protocol-1, " full empty" ), raw=True )
     for pos in range(22, len(data)-7, 7):
         sdata = data[pos:pos+7]
         if sdata.startswith("\\"):

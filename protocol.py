@@ -25,7 +25,7 @@
 #
 # Imports
 
-import string, re, struct, datetime, time, errno
+import re, struct, datetime, time, errno
 import socket	# for network byte translations
 
 ###################
