@@ -41,17 +41,32 @@ class statusBar(object): ## {{{
 		curses.doupdate()
 ## }}}
 
+class column(object): ##{{{
+	def __init__(self, x, w, func, title):
+		self.x = x # horizontal position
+		self.w = w # column width
+		self.disp = func # function to return display string
+		self.title = title # column title
+	## }}}
+
 class serverList(object): ## {{{
 
 	def __init__(self):
-		self.win = curses.newwin(curses.LINES-3, curses.COLS-2, 1,1)
+		w = curses.COLS-2
+		h = curses.LINES-3
+		self.win = curses.newwin(h, w, 1,1)
 		self.pan = panel.new_panel(self.win)
 		self.items = []
 		self.pos = 1
 
 		## Column locations and widths
-		self.colw = [3, 5, int(0.2*(curses.COLS-10)), int(0.2*(curses.COLS-10)), int(0.2*(curses.COLS-10)), int(0.4*(curses.COLS-10)) ]
-		self.colp = [ sum(self.colw[:n])+n for n in range(len(self.colw)) ]
+		colpng = column(0, 3, lambda x: '000', 'png')
+		colplyr = column(4, 5, lambda x: '%02d/%02d' % ( x.clients, x.maxclients), 'plyrs')
+		colmap = column(10, int((w-10)*0.2), lambda x: x.map, 'map')
+		colmod = column(11+int((w-10)*0.2), int((w-10)*0.2), lambda x: x.map, 'mod')
+		colgt = column(12+2*int((w-10)*0.2), int((w-10)*0.2), lambda x: x.gametype, 'gametype')
+		colname = column(13+3*int((w-10)*0.2), int((w-10)*0.4)-1, lambda x: x.name, 'name')
+		self.columns = [ colpng, colplyr, colmap, colmod, colgt, colname ]
 	
 	def add(self, server):
 		self.items.append(server)
@@ -65,25 +80,16 @@ class serverList(object): ## {{{
 	def disp(self):
 		self.win.clear()
 		## Print column headers
-		self.win.addstr(0, self.colp[0], 'png')
-		self.win.addstr(0, self.colp[1], 'plyrs')
-		self.win.addstr(0, self.colp[2], 'map')
-		self.win.addstr(0, self.colp[3], 'mod')
-		self.win.addstr(0, self.colp[4], 'gametype')
-		self.win.addstr(0, self.colp[5], 'name')
+		for col in self.columns:
+			self.win.addstr(0, col.x, col.title[:col.w])
 
 		ymax, xmax = self.win.getmaxyx()
 		y = 1
 		for server in self.items:
-			if y > ymax:
+			if y > ymax-5:
 				break
-			self.win.addstr(y, self.colp[0], '000')
-			self.win.addstr(y, self.colp[1], '%02d/%02d' % ( server.clients, server.maxclients ))
-			self.win.addstr(y, self.colp[2], server.map)
-			self.win.addstr(y, self.colp[3], server.mod)
-			self.win.addstr(y, self.colp[4], server.gametype)
-			self.win.addstr(y, self.colp[5], server.name[:self.colw[5]])
-			#colorPrint( self.win, [y, self.colp[5], self.colw[5] ], server.name[:curses.COLS-self.colp[5]-3] )
+			for col in self.columns:
+				self.win.addstr(y, col.x, col.disp(server)[:col.w] )
 			y += 1
 		panel.update_panels()
 		curses.doupdate()
