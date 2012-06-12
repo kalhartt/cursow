@@ -49,6 +49,8 @@ class App(object):
 				self.serverList.moveDown()
 			elif key == ord('x'):
 				self.serverList.nextSort()
+			elif key == ord('X'):
+				self.serverList.reverseSort()
 			elif key == ord('z'):
 				self.status.disp('Launching')
 				self.serverList.launch()

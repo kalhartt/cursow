@@ -51,6 +51,7 @@ class serverList(object): ## {{{
 		colname = column(13+3*int((w-10)*0.2), int((w-10)*0.4)-1, lambda x: x.name, lambda x: x.name2, 'name')
 		self.columns = [ colpng, colplyr, colmap, colmod, colgt, colname ]
 		self.sortcol = 1
+		self.reverse = False
 	
 	def add(self, server):
 		self.items.append(server)
@@ -59,7 +60,7 @@ class serverList(object): ## {{{
 
 	def sort(self):
 		sortkey = self.columns[ self.sortcol ].sort
-		self.items = sorted(self.items, key=sortkey)
+		self.items = sorted(self.items, key=sortkey, reverse=self.reverse)
 	
 	def nextSort(self):
 		self.sortcol += 1
@@ -67,12 +68,21 @@ class serverList(object): ## {{{
 		self.sort()
 		self.disp()
 	
+	def reverseSort(self):
+		self.reverse = not self.reverse
+		self.disp()
+	
 	def disp(self):
 		self.win.clear()
 
 		## Print column headers
-		for col in self.columns:
-			self.win.addstr(0, col.x, col.title[:col.w])
+		for n in range(len(self.columns)):
+			col = self.columns[n]
+			if n == self.sortcol:
+				mode = curses.A_REVERSE
+			else:
+				mode = curses.A_NORMAL
+			self.win.addstr(0, col.x, col.title[:col.w], mode)
 
 		## Print Columns
 		ymax, xmax = self.win.getmaxyx()
