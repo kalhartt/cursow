@@ -5,25 +5,6 @@ from curses import panel
 escchar = re.compile(r'(\^.)')
 stripcol = re.compile(r'(\^[0-9])')
 
-def colorPrint( win, pos, msg, attr=curses.A_NORMAL ): ## {{{
-	## pos = [ y , x , width ]
-	msg = re.split( escchar, msg)
-	color = curses.color_pair(1)
-
-	w = 0
-	for submsg in msg:
-		if w > pos[2]:
-			break
-		if submsg[0] == '^':
-			try:
-				color = curses.color_pair(int(submsg[1]))
-				continue
-			except ValueError:
-				pass
-		win.addstr(pos[0], pos[1]+w, submsg[:pos[2]-w], color)
-		w += len(submsg)
-	## }}}
-	
 class statusBar(object): ## {{{
 	def __init__(self):
 		self.win = curses.newwin(1, curses.COLS, curses.LINES-1, 0) 
@@ -79,19 +60,57 @@ class serverList(object): ## {{{
 	
 	def disp(self):
 		self.win.clear()
+
 		## Print column headers
 		for col in self.columns:
 			self.win.addstr(0, col.x, col.title[:col.w])
 
+		## Print Columns
 		ymax, xmax = self.win.getmaxyx()
 		y = 1
 		for server in self.items:
+			color = curses.color_pair(1)
 			if y > ymax-5:
 				break
+
+			if y == self.pos:
+				mode = curses.A_REVERSE
+				self.win.insstr(y,0, curses.COLS*' ', color|mode)
+			else:
+				mode = curses.A_NORMAL
+
 			for col in self.columns:
-				self.win.addstr(y, col.x, col.disp(server)[:col.w] )
+				msg = col.disp(server)
+				lenmsg = len(msg)
+				n = x = 0
+				while n < col.w and n < lenmsg:
+					if msg[n] == '^' and n < lenmsg-1:
+						c = msg[n+1]
+						if ord(c) < 58 and ord(c) > 47:
+							color = curses.color_pair(int(c)+2)
+							n += 2
+							continue
+						elif c == '^':
+							self.win.addstr(y, col.x+x, msg[n], color|mode )
+							n += 2
+							x += 1
+							continue
+					self.win.addstr(y, col.x+x, msg[n], color|mode )
+					n += 1
+					x += 1
 			y += 1
 		panel.update_panels()
 		curses.doupdate()
+	
+	def moveUp(self):
+		self.pos -= 1
+		if self.pos < 0: self.pos = 0
+		self.disp()
+
+	def moveDown(self):
+		self.pos += 1
+		maxy = min( curses.LINES-3, len(self.items) )
+		if self.pos > maxy: self.pos = maxy
+		self.disp()
 
 ## }}}

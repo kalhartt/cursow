@@ -29,7 +29,7 @@ class App(object):
 		## Query Master Servers
 		for host in wsw.masterServers:
 		 	self.status.disp('Querying Master Server: %s' % host)
-		 	self.serverips = self.serverips | server.MasterServer( host, port=wsw.port, protocol=wsw.protocol, options=wsw.options, timeout=1)
+		 	self.serverips = self.serverips | server.MasterServer( host, port=wsw.port, protocol=wsw.protocol, options='', timeout=1)
 		 	panel.update_panels()
 		 	curses.doupdate()
 
@@ -38,19 +38,15 @@ class App(object):
 		self.serverThread.start()
 
 		## Main Loop
-		n = -1
 		while True:
 			key = screen.getch()
 			if key == ord('q') or key == ord('Q'):
 				self.quit = True
 				break
-			else:
-				self.status.disp( 'Hi There', self.colors[n]|curses.A_REVERSE )
-				n += 1
-				if n == 10:
-					n=-1
-				panel.update_panels()
-				curses.doupdate()
+			elif key == ord('w') or key == ord('u') or key == curses.KEY_UP:
+				self.serverList.moveUp()
+			elif key == ord('s') or key == ord('e') or key == curses.KEY_DOWN:
+				self.serverList.moveDown()
 
 	def processServers(self): ##{{{
 		for ip in self.serverips:
