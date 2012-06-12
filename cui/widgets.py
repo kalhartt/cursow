@@ -23,10 +23,11 @@ class statusBar(object): ## {{{
 ## }}}
 
 class column(object): ##{{{
-	def __init__(self, x, w, func, title):
+	def __init__(self, x, w, func, sortkey, title):
 		self.x = x # horizontal position
 		self.w = w # column width
 		self.disp = func # function to return display string
+		self.sort = sortkey # function to be key for sorted()
 		self.title = title # column title
 	## }}}
 
@@ -42,22 +43,29 @@ class serverList(object): ## {{{
 		self.firstrow = 0
 
 		## Column locations and widths
-		colpng = column(0, 3, lambda x: '000', 'png')
-		colplyr = column(4, 5, lambda x: '%02d/%02d' % ( x.clients, x.maxclients), 'plyrs')
-		colmap = column(10, int((w-10)*0.2), lambda x: x.map, 'map')
-		colmod = column(11+int((w-10)*0.2), int((w-10)*0.2), lambda x: x.map, 'mod')
-		colgt = column(12+2*int((w-10)*0.2), int((w-10)*0.2), lambda x: x.gametype, 'gametype')
-		colname = column(13+3*int((w-10)*0.2), int((w-10)*0.4)-1, lambda x: x.name, 'name')
+		colpng = column(0, 3, lambda x: x.ping, lambda x: x.ping, 'png')
+		colplyr = column(4, 5, lambda x: '%02d/%02d' % ( x.clients, x.maxclients), lambda x: x.clients, 'plyrs')
+		colmap = column(10, int((w-10)*0.2), lambda x: x.map, lambda x: x.map, 'map')
+		colmod = column(11+int((w-10)*0.2), int((w-10)*0.2), lambda x: x.mod, lambda x: x.mod, 'mod')
+		colgt = column(12+2*int((w-10)*0.2), int((w-10)*0.2), lambda x: x.gametype, lambda x: x.gametype, 'gametype')
+		colname = column(13+3*int((w-10)*0.2), int((w-10)*0.4)-1, lambda x: x.name, lambda x: x.name2, 'name')
 		self.columns = [ colpng, colplyr, colmap, colmod, colgt, colname ]
+		self.sortcol = 1
 	
 	def add(self, server):
 		self.items.append(server)
-		#self.sort()
+		self.sort()
 		self.disp()
 
 	def sort(self):
-		sortkey = lambda x: re.sub('\^[0-9]', '', x.name)
+		sortkey = self.columns[ self.sortcol ].sort
 		self.items = sorted(self.items, key=sortkey)
+	
+	def nextSort(self):
+		self.sortcol += 1
+		if self.sortcol >= len(self.columns): self.sortcol = 0
+		self.sort()
+		self.disp()
 	
 	def disp(self):
 		self.win.clear()

@@ -47,6 +47,8 @@ class App(object):
 				self.serverList.moveUp()
 			elif key == ord('s') or key == ord('e') or key == curses.KEY_DOWN:
 				self.serverList.moveDown()
+			elif key == ord('x'):
+				self.serverList.nextSort()
 			elif key == ord('z'):
 				self.status.disp('Launching')
 				self.serverList.launch()

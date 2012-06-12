@@ -13,7 +13,7 @@ class REs(object): ##{{{
     # parse a player line from "rcon status" command
     # 2 0 70 |ALPHA| Mad Professor^7 0 127.0.0.1:35107 229 25000
     RCON_STATUS = re.compile(r'\s*(\d+)\s+(-?)(\d+)\s+(\d+)\s+(.*)\^7\s+(\d+)\s+(\S*)\s+(\d+)\s+(\d+)')
-
+    STRIPCOLOR = re.compile(r'(\^[0-9])')
     ##}}}
 
 class Player(object): ##{{{
@@ -112,13 +112,15 @@ class Parser(object): ##{{{
         values = data[1::2]
         self.variables = dict(zip(keys, values))
 
-        self.clients= int(self.variables["clients"])
-        self.name = self.variables["sv_hostname"]
-        self.game = self.variables["gamename"]
+        self.clients= int(self.variables.get('clients', 1))
+        self.name = self.variables.get('sv_hostname', '' )
+        self.name2 = re.sub( REs.STRIPCOLOR, '', self.name )
+        self.game = self.variables.get('gamename', '')
         self.gametype = self.variables["gametype"]
         self.map = self.variables["mapname"]
         self.maxclients= int(self.variables["sv_maxclients"])
         self.mod = self.variables["fs_game"]
+        self.ping = '000'
         self.protocol = self.variables["protocol"]
         self.version = self.variables["version"] ##}}}
 
