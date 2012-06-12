@@ -29,7 +29,7 @@ class App(object):
 		## Query Master Servers
 		for host in wsw.masterServers:
 		 	self.status.disp('Querying Master Server: %s' % host)
-		 	self.serverips = self.serverips | server.MasterServer( host, port=wsw.port, protocol=wsw.protocol, options='', timeout=1)
+		 	self.serverips = self.serverips | server.MasterServer( host, port=wsw.port, protocol=wsw.protocol, options=wsw.options, timeout=1)
 		 	panel.update_panels()
 		 	curses.doupdate()
 
@@ -47,6 +47,11 @@ class App(object):
 				self.serverList.moveUp()
 			elif key == ord('s') or key == ord('e') or key == curses.KEY_DOWN:
 				self.serverList.moveDown()
+			elif key == ord('z'):
+				self.status.disp('Launching')
+				self.serverList.launch()
+				self.quit = True
+				break
 
 	def processServers(self): ##{{{
 		for ip in self.serverips:

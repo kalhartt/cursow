@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import curses, re
+import curses, re, subprocess, os
 from curses import panel
 
 escchar = re.compile(r'(\^.)')
@@ -33,12 +33,13 @@ class column(object): ##{{{
 class serverList(object): ## {{{
 
 	def __init__(self):
-		w = curses.COLS-2
-		h = curses.LINES-3
-		self.win = curses.newwin(h, w, 1,1)
+		w = self.w = curses.COLS-2
+		h = self.h = curses.LINES-3
+		self.win = curses.newwin(self.h, self.w, 1,1)
 		self.pan = panel.new_panel(self.win)
 		self.items = []
 		self.pos = 1
+		self.firstrow = 0
 
 		## Column locations and widths
 		colpng = column(0, 3, lambda x: '000', 'png')
@@ -67,11 +68,12 @@ class serverList(object): ## {{{
 
 		## Print Columns
 		ymax, xmax = self.win.getmaxyx()
-		y = 1
-		for server in self.items:
-			color = curses.color_pair(1)
-			if y > ymax-5:
+		for y in range(1,self.h):
+			if self.firstrow+y >= len(self.items):
 				break
+
+			server = self.items[self.firstrow + y]
+			color = curses.color_pair(1)
 
 			if y == self.pos:
 				mode = curses.A_REVERSE
@@ -103,14 +105,30 @@ class serverList(object): ## {{{
 		curses.doupdate()
 	
 	def moveUp(self):
+		if self.pos == 1:
+			self.firstrow -= 1
+			if self.firstrow < 0: self.firstrow = 0
+			self.disp()
+			return
 		self.pos -= 1
-		if self.pos < 0: self.pos = 0
+		if self.pos < 1: self.pos = 1
 		self.disp()
 
 	def moveDown(self):
+		if self.pos == self.h-1:
+			self.firstrow += 1
+			if self.firstrow + self.pos >= len(self.items)-3:
+				self.pos -= 1
+			self.disp()
+			return
 		self.pos += 1
-		maxy = min( curses.LINES-3, len(self.items) )
+		maxy = min( self.h-1, len(self.items) )
 		if self.pos > maxy: self.pos = maxy
 		self.disp()
+	
+	def launch(self):
+		server = self.items[self.firstrow + self.pos-1]
+		args = ['/opt/warsow/warsow', 'connect', '%s:%d' % (server.host, server.port)]
+		p = subprocess.Popen(args, stdout=file(os.devnull, 'w'))
 
 ## }}}
