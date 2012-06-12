@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import curses, threading, time
+import curses, threading, time, csv
 from curses import panel
 import color, widgets
 from net import *
@@ -64,6 +64,7 @@ class App(object):
 			newThread = threading.Thread(target=self.processServer, args=[ip] )
 			newThread.start()
 		self.status.disp(str(len(self.serverips)))
+		self.writeServers()
 		## }}}
 	
 	def processServer(self,ip):
@@ -74,6 +75,12 @@ class App(object):
 			self.serverList.add(srv)
 		except Exception as err:
 			self.status.disp('Excepted: %s' % err )
+	
+	def writeServers(self):
+		writer = csv.writer(open('servers.txt', 'w'))
+		for server in self.serverList.items:
+			result = [ col.disp(server) for col in self.serverList.columns ]
+			writer.writerow( result )
 	
 	def quit(self):
 		pass

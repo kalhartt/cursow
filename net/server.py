@@ -113,7 +113,7 @@ class Parser(object): ##{{{
         self.variables = dict(zip(keys, values))
 
         self.clients= int(self.variables.get('clients', 1))
-        self.name = self.variables.get('sv_hostname', '' )
+        self.name = self.variables['sv_hostname']
         self.name2 = re.sub( REs.STRIPCOLOR, '', self.name )
         self.game = self.variables.get('gamename', '')
         self.gametype = self.variables["gametype"]

@@ -1,0 +1,138 @@
+000,00/04,wca1,basewsw,ca,nitrado.net gameserver
+000,00/14,wamphi1,promod,duel,^5warsow-esport.net ^7Cup server 6 by crizis
+000,00/20,slide_arena_v3,basewsw,slide_ca,^0.^7CG ^0| ^9RU ^7SLiDE
+000,00/14,midair_b6,promod,midair,^5warsow-esport.net ^7Duel 1 by crizis
+000,00/16,bipbeta2,basewsw,duel,^0.^6CG ^0| ^9RU ^6Pink ^9private
+000,00/14,wdm5,promod,duel,^5warsow-esport.net ^7Duel 2 by crizis
+000,00/14,wdm1,promod,duel,^5warsow-esport.net ^7Duel 3 by crizis
+000,00/16,wamphi2,basewsw,tdm,^0.^0CG ^0| ^9RU ^0Black
+000,00/14,wca1,promod,ca,^5warsow-esport.net ^7Cup server 3 by crizis
+000,00/16,wca1,basewsw,ca,NFOservers.com - New server
+000,00/14,wda1,promod,da,^5warsow-esport.net ^7Cup server 4 by crizis
+000,00/16,wca3,basewsw,ca,teriyaki server #1
+000,00/32,wdm6,basewsw,duel,^1tastyspleen.net^3::^1warsow-east
+000,00/32,wdm5,promod,duel,[nova] warsow server 
+000,00/32,wca1,promod,ca,[nova] allfree server  
+000,00/10,cwl4,basewsw,midair,stnrgrnd_midair
+000,00/32,wdm5,promod,duel,[nova] server for beginners 
+000,00/10,xdo1,promod,xdo,XDO Server #SaveCommunity 
+000,00/16,coldrun,racesow,race,rs_test_jpn
+000,00/16,bipbeta2,basewsw,ca,warsow server
+000,00/16,wdm12,promod,duel,^1A^0X_^8Promod_duel 3
+000,00/16,wctf5,basewsw,ctftactics,^0A^1X_^8|^5Vote ^9FREE
+000,00/20,ra3map1,promod,ra,^5warsow-esport.net ^1ROCKET ARENA ^7by crizis
+000,00/14,wctf4,promod,ccc,^1Kandru.de ^2CTFT
+000,00/16,wdm2,basewsw,duel,^0.^2CG ^0| ^9RU ^2Green
+000,00/10,cwl4,basewsw,duel,^8warsow-esport.net ^7Insta 2 by crizis
+000,00/10,cwl4,basewsw,ca,^8warsow-esport.net ^7Insta 1 by crizis
+000,00/16,pornstar-12percent,racesow,error,^7warsow-race.net ^8FR #2 ^9RACE
+000,00/16,matt-race001,racesow,freestyle,^7warsow-race.net ^8FR ^9FS
+000,00/14,wdm2,promod,duel,^5warsow-esport.net ^7Cup server 8 by crizis
+000,00/14,wdm2,promod,duel,^5warsow-esport.net ^7Cup server 7 by crizis
+000,00/32,cwl4,basewsw,rm,^1Kandru.de ^2RocketMania
+000,00/16,wca1,basewsw,duel,^7project1^0leauge ^8aim masters DE.2
+000,00/16,wca1,basewsw,ca,^7project1^0leauge ^8aim masters DE.1
+000,00/16,wca1,basewsw,ca,^7project1^0leauge ^8aim masters DE.4
+000,00/16,wca1,basewsw,ca,^7project1^0leauge ^8aim masters DE.3
+000,00/16,wdm12,promod,duel,^4|^7|^1|^7warsow-fr.net - Pickup IRC
+000,00/12,wda2,promod,da,[^5CA^7] ^5N^7o ^5C^7lasses PRO ^5P^7ublic
+000,00/12,wca1,promod,ca,[^5CA^7] ^5N^7o ^5C^7lasses PRO ^5P^7rivate
+000,00/16,wdm12,basewsw,dm,^0.^9CG ^0| ^9RU ^1R^2a^3i^4n^5b^8o^6w
+000,00/10,wdm2,Promod,dm,tuganetGames - ^0war^9S^0ow minimal ^3playground
+000,00/16,wda3,promod,fdm,^2#^0K2R^2# ^3FIST DEATHMATCH
+000,00/16,wdm3,promod,duel,Ruige Cup Server
+000,00/16,wdm2,promod,duel,^7project1^0leauge ^8weapon masters DE.6
+000,00/16,acidwdm11,basewsw,duel,^2sunn.xan^0NODE^7: ^6sexy ^0frag^1world ^7by ^5dieTeK
+000,00/16,wdm2,promod,duel,^7project1^0leauge ^8weapon masters DE.4
+000,00/16,wdm2,promod,duel,^7project1^0leauge ^8weapon masters DE.1
+000,00/16,wdm2,promod,duel,^7project1^0leauge ^8weapon masters DE.2
+000,00/100,slide_air_b2,basewsw,slide_ca,#^5ULTRA ^8NYAN ^2CLAN SERVER
+000,00/12,coldrun,racesow,race,^7warsow-race.net ^8US #1 ^9Race
+000,00/14,wda2,promod,da,^5warsow-esport.net ^7Cup server 1 by crizis
+000,00/16,wca1,basewsw,ca,TDT4285 Warsow
+000,00/16,wdm9,basewsw,FFA,Joes-Warsow
+000,00/16,wdm5,promod,duel,Friday Cup Server
+000,00/16,wdm5,promod,duel,instant Duel Server(3minDuel)
+000,00/16,wca2,basewsw,ca,[^1SM^7]^3Slackers Motivated ^7- ^2Warsow CA
+000,00/32,wdm2,basewsw,duel,^1tastyspleen.net^3::^1warsow
+000,00/20,factory_beta,promod,bomb,^5warsow-esport.net ^7Bomb&Defuse 10v10 by crizis
+000,00/16,wca1,basewsw,tdo,PCSupremacy.co.uk
+000,00/16,cwrace5,basewsw,duel,^0.^7CG ^0| ^9RU ^7White
+000,00/16,wca1,basewsw,dm,^4insta.^0pelala^7.net
+000,00/14,bipbeta2,basewsw,ca,Retro eSports warsow server
+000,00/16,wca1,basewsw,duel,^8warsow-esport.net ^7Insta Cup 1 by crizis
+000,00/16,wdm2,basewsw,duel,^8warsow-esport.net ^7Insta Cup 2 by crizis
+000,00/16,wca1,basewsw,ca,^2Q^7uake^2.^7Fr - Warsow 1
+000,00/21,xmas_river,basewsw,catch,^1Kandru.de ^2Catch
+000,00/16,wda4,basewsw,dm,"^0Instagib ^1wda4^0. ^1All Day, ^0All Night^1!"
+000,00/16,wda4,basewsw,ca,^2TERRA ^7# ^4all mods #1
+000,00/16,wca1,basewsw,ca,^7SM^5OO^7TH ^6OPERATORS^7 NA CA
+000,00/24,wdm7,promod,dm,^8fsgamers.org ^3#3 ^5votable ^2instagib
+000,00/24,wdm3,promod,duel,^8fsgamers.org ^3#2 ^5votable
+000,00/24,wdm5,promod,dm,^8fsgamers.org ^3#1 ^5votable
+000,00/16,wdm13,promod,ctc,^4|^7|^1|^7warsow-fr.net - NW Public Server #1
+000,00/32,wca1,excessiveplus,ca,^18^7CLAN^1*^7X^1*
+000,00/16,wca1,basewsw,ca,^0.^7CG ^0| ^9RU ^7Semi-White
+000,00/16,wca1,basewsw,ca,^5warsow-esport.net ^7Insta Pickup by crizis
+000,00/16,cwrace4,basewsw,duel,^0.^4CG ^0| ^9RU ^4Blue
+000,00/16,wdm5,basewsw,duel,^0.^9CG ^0| ^9RU ^9Gray
+000,00/18,wca1,basewsw,ca,Instagib Retro eSports
+000,00/08,wdm20,basewsw,dm,^7>>TEAM-^5LANII^7.de ^3- MEGA  MADNESS ^0- iDM<<
+000,00/10,wdm5,basewsw,duel,YCN-Hosting | Warsow Server
+000,00/16,wdm3,basewsw,ffa,dflemstr
+000,00/10,wdm17test,promod,duel,^7random ^0house ^9duel
+000,00/32,wdm9,basewsw,dm,^3Undergroundlayer.com ^5| ^2Deathmatch ^5|
+000,00/12,wca1,basewsw,ca,^0K^0a^6c^0e^6Y^0s & Fe^6A^0rs S^6e^0rv^6e^0r
+000,00/10,coldrun,racesow,race,^7warsow-race.net ^8US #2 ^9Race
+000,00/16,wctf1,promod,ctf,^5warsow-esport.net ^7Pickup by crizis
+000,00/16,wdm19,basewsw,ca,^8warsow-esport.net ^7Insta Cup 3 by crizis
+000,00/20,wdm1,basewsw,duel,FR YOSEI -> www.yosei.fr (team multigaming)
+000,00/16,wca1,basewsw,ca,MD Warsow Insta Server
+000,00/16,wda2,basewsw,duel,^8warsow-esport.net ^7Insta Cup 4 by crizis
+000,00/08,wca1,basewsw,ca,MD Warsow Newbie Free Server Pasu ha nihon no syuto
+000,00/16,wctf6,basewsw,ctf,Hanseschlacht insta_ctf Warsow Server
+000,00/16,midair_b6,basewsw,midair,MD Warsow FREE Server 1
+000,00/16,wca1,basewsw,ca,MyMGN.COM | Warsow Rocketeers #1
+000,00/08,bipbeta2,basewsw,duel,UA server //ssl.dp.ua//
+000,00/32,wdm1,basewsw,dm,Gamer01 Warsow Server
+000,00/64,wdm1,promod,ca,^1Kandru.de ^2Clanserver
+000,00/16,wdm2,promod,duel,^7project1^0leauge ^8weapon masters DE.5
+000,00/16,wdm2,promod,duel,^7project1^0leauge ^8weapon masters DE.3
+000,00/16,wdm6,basewsw,duel,TKK Warsow warsow@kablowy.net
+000,00/16,wdm14,basewsw,duel,3FL Warsow #1
+000,00/16,wca1,basewsw,ca,^7project1^0leauge ^8aim masters UK.2
+000,00/16,wca1,basewsw,ca,^7project1^0leauge ^8aim masters UK.1
+000,00/16,wca1,basewsw,ca,^7project1^0leauge ^8aim masters UK.3
+000,00/16,slide_arena_v3,basewsw,slide,^9Li^5Fe^3'^5Sl^9!^5de
+000,00/16,embackyard,promod,bomb,Welcome to the ^2JUNGLE BOMB!
+000,00/12,wca1,basewsw,duel,Welcome To The ^2JUNGLE!
+000,00/10,wdm1,basewsw,ffa,stnrgrnd bomb
+000,00/16,wdm5,promod,duel,dieTeK presents british duel house
+000,00/16,wda1,promod,fdm,^4|^7|^1|^7warsow-fr.net - FIST Private
+000,01/10,bardok-egypt,basewsw,race,^7wsw.pro519.ru
+000,01/14,wdm1,promod,ffa,^5warsow-esport.net ^7Duel 4 by crizis
+000,01/14,wamphi1,promod,duel,^5warsow-esport.net ^7Cup server 2 by crizis
+000,01/20,0ups-grenaderun1,racesow,race,^7warsow-race.net ^8FR #1 ^9RACE
+000,01/32,wdm5,basewsw,duel,^1tastyspleen.net^3::^1warsow-match
+000,01/32,padcastle,racesow,freestyle,^7warsow-race.net ^8DE #3 ^9FREESTYLE
+000,01/16,czsk2007-artx,racesow,race,^7warsow-race.net ^8DE #1 ^9RACE
+000,02/32,cwl4,basewsw,agungame,^1Kandru.de ^2aGunGame
+000,02/10,wdm17,basewsw,dm,Spielegalaxie
+000,02/16,bipbeta2,basewsw,duel,^4|^7|^1|^7warsow-fr.net - Instagib Pulic #2
+000,02/16,pornstar-killua,racesow,race,^7warsow-race.net ^8DE #2 ^9RACE
+000,02/16,cwL2,basewsw,dm,[^1SM^7]^3Slackers Motivated ^7- ^2Warsow DM
+000,02/12,wdm20,basewsw,duel,^0I^1'^0M^1|^0INSTA^1'^0MASTERS^1|^0I^1'^0M iDuel
+000,02/16,bipbeta2,basewsw,ffa,^1Fast ^3Dash Boost Strafe ^7ffa
+000,02/06,wca1,basewsw,dm,[Deutschland Server]
+000,02/10,wca1,promod,duel,^9]^0v^9V^0v^9[^0no1^9]
+000,03/16,wdm5,promod,duel,^1A^0X_^8Promod_duel 1
+000,04/16,wdm5,promod,duel,^1A^0X_^8Promod_duel 2
+000,05/08,bipbeta2,basewsw,ca,^0'k^8i^0| »^8Ketsu^0·^5Insta^0«
+000,05/12,cwL4,basewsw,gungame,^4[^7||^1] ^7NekoServ ^0- ^7Public Server #1
+000,05/06,bipbeta2,basewsw,ca,bli. #2
+000,06/20,bipbeta2,basewsw,ca,DFC Warsow Server
+000,08/12,bipbeta2,basewsw,ca,^0~^1~^8~^3~^7|^5ic^7| ^5I^0NSTA^5C^0IDE ^7|^5ic^7|^3~^8~^1~^0~
+000,10/16,cwm2,promod,ca,^5warsow-esport.net ^7Clan Arena NC by crizis
+000,10/32,wdm5,basewsw,ffa,OptiZone.Ru | War�ow #1
+000,12/24,bipbeta2,basewsw,ca,^0I^1'^0M^1|^0INSTA^1'^0MASTERS^1|^0I^1'^0M Public
+000,13/16,surv_sepulcher_v1,basewsw,survival,^2Li^3Fe^1'^2Tri^3ckj^1ump^2
