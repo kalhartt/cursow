@@ -5,7 +5,7 @@ from curses import panel
 escchar = re.compile(r'(\^.)')
 stripcol = re.compile(r'(\^[0-9])')
 
-def colorPrint( win, pos, msg, attr=curses.A_NORMAL ):
+def colorPrint( win, pos, msg, attr=curses.A_NORMAL ): ## {{{
 	## pos = [ y , x , width ]
 	msg = re.split( escchar, msg)
 	color = curses.color_pair(1)
@@ -22,17 +22,17 @@ def colorPrint( win, pos, msg, attr=curses.A_NORMAL ):
 				pass
 		win.addstr(pos[0], pos[1]+w, submsg[:pos[2]-w], color)
 		w += len(submsg)
+	## }}}
 	
-
 class statusBar(object): ## {{{
 	def __init__(self):
 		self.win = curses.newwin(1, curses.COLS, curses.LINES-1, 0) 
 		self.pan = panel.new_panel(self.win)
 		#self.win.bkgdset(ord(' '), curses.color_pair(12))
-		self.win.clrtoeol()
+		self.win.clear()
 	
 	def disp(self, msg, attr=False):
-		self.win.clrtobot()
+		self.win.clear()
 		if attr:
 			self.win.addstr(0,0, msg[:curses.COLS], attr)
 		else:
@@ -63,7 +63,7 @@ class serverList(object): ## {{{
 		self.items = sorted(self.items, key=sortkey)
 	
 	def disp(self):
-		self.win.clrtobot()
+		self.win.clear()
 		## Print column headers
 		self.win.addstr(0, self.colp[0], 'png')
 		self.win.addstr(0, self.colp[1], 'plyrs')
@@ -82,7 +82,8 @@ class serverList(object): ## {{{
 			self.win.addstr(y, self.colp[2], server.map)
 			self.win.addstr(y, self.colp[3], server.mod)
 			self.win.addstr(y, self.colp[4], server.gametype)
-			colorPrint( self.win, [y, self.colp[5], self.colw[5] ], server.name )
+			self.win.addstr(y, self.colp[5], server.name[:self.colw[5]])
+			#colorPrint( self.win, [y, self.colp[5], self.colw[5] ], server.name[:curses.COLS-self.colp[5]-3] )
 			y += 1
 		panel.update_panels()
 		curses.doupdate()
