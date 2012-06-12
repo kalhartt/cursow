@@ -43,7 +43,7 @@ class serverList(object): ## {{{
 		self.firstrow = 0
 
 		## Column locations and widths
-		colpng = column(0, 3, lambda x: x.ping, lambda x: x.ping, 'png')
+		colpng = column(0, 3, lambda x: '%03d' % x.ping, lambda x: x.ping, 'png')
 		colplyr = column(4, 5, lambda x: '%02d/%02d' % ( x.clients, x.maxclients), lambda x: x.clients, 'plyrs')
 		colmap = column(10, int((w-10)*0.2), lambda x: x.map, lambda x: x.map, 'map')
 		colmod = column(11+int((w-10)*0.2), int((w-10)*0.2), lambda x: x.mod, lambda x: x.mod, 'mod')
