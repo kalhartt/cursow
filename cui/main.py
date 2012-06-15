@@ -7,8 +7,6 @@ from net import *
 
 from options import Settings
 
-import csv
-
 class App(object):
 	def __init__(self,screen):
 		## curses options
@@ -26,9 +24,13 @@ class App(object):
 		self.serverips = set()
 
 		self.mainwin = curses.newwin(0,0)
+		self.fltrwin = curses.newwin( curses.LINES-4, curses.COLS-8, 2,4)
 		self.mainpan = panel.new_panel( self.mainwin )
+		self.fltrpan = panel.new_panel( self.fltrwin )
+		self.fltrpan.top()
 		self.status = widgets.statusBar( self.mainwin )
 		self.srvlst = widgets.serverList( self.mainwin )
+		self.filter = widgets.filterPane( self.fltrwin )
 
 		## Import servers
 		self.mainThread = threading.Thread(target=self.queryMasters)
@@ -101,6 +103,13 @@ class App(object):
 					time.sleep(0.2)
 				self.launch()
 				break
+
+			elif key == ord('x'):
+				if self.fltrpan.hidden():
+					self.fltrpan.show()
+				else:
+					self.fltrpan.hide()
+				panel.update_panels()
 
 			curses.doupdate()
 	

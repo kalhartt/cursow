@@ -182,5 +182,20 @@ class serverList(object):
 			x += col.w+1
 		self.win.noutrefresh()
 		## }}}
+
+class filterPane(object):
+	opts = {
+			'instagib' : 'show',
+			'gametype' : 'all',
+			'full' : 'show',
+			'empty' : 'show',
+			}
+
+	def __init__(self, win):
+		self.h, self.w = win.getmaxyx()
+		self.win = win
+		self.win.clrtobot()
+		self.win.box()
+		self.pos = 0
 	
 ## vim: set ts=4 sw=4 noexpandtab: ##
