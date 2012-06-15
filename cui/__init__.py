@@ -1,3 +1,3 @@
 #!/usr/bin/env python2
-__all__ = ['color', 'main', 'widgets']
+__all__ = ['color', 'main', 'options', 'widgets']
 

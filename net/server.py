@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import connection, re, time
+import net, connection, re, subprocess
 
 class REs(object): ##{{{
 	"""
@@ -14,6 +14,7 @@ class REs(object): ##{{{
 	# 2 0 70 |ALPHA| Mad Professor^7 0 127.0.0.1:35107 229 25000
 	RCON_STATUS = re.compile(r'\s*(\d+)\s+(-?)(\d+)\s+(\d+)\s+(.*)\^7\s+(\d+)\s+(\S*)\s+(\d+)\s+(\d+)')
 	STRIPCOLOR = re.compile(r'(\^[0-9])')
+	PING = re.compile( r'\d+\.\d+/(\d+\.\d+)/\d+\.\d+/\d+\.\d+')
 	##}}}
 
 class Player(object): ##{{{
@@ -45,12 +46,13 @@ class Player(object): ##{{{
 class Server(object): ##{{{
 	"""Record collecting information about a server."""
 
-	def __init__(self, filter_colors=False): ##{{{
+	def __init__(self, host, port, filter_colors=False): ##{{{
 		"""Create empty record with lots of None fields."""
 		# meta information before connect
+		self.connection = connection.Connection(host, port, retries=1)
 		self.filter = filter_colors
-		self.host = None
-		self.port = None
+		self.host = host
+		self.port = port
 		# shortcuts to well-known variables
 		self.name = None
 		self.game = None
@@ -86,19 +88,6 @@ class Server(object): ##{{{
 				i += 1
 		return result ##}}}
 
-	def __str__(self): ##{{{
-		"""Short summary of name, address, and map."""
-		return ("Server<name: %s; address: %s; map: %s>" %
-			(self.name, self.address(), self.map)) ##}}}
-
-	##}}}
-
-class Parser(object): ##{{{
-	"""
-	Mixin class to parse various server responses into
-	useful information. Should be applied to subclasses
-	of Server.
-	"""
 	def parse_getstatus_variables(self, data): ##{{{
 		"""
 		Parse variables portion of getstatus response.
@@ -120,9 +109,10 @@ class Parser(object): ##{{{
 		self.map = self.variables["mapname"]
 		self.maxclients= int(self.variables["sv_maxclients"])
 		self.mod = self.variables["fs_game"]
+		self.ping = 0
 		self.protocol = self.variables["protocol"]
 		self.version = self.variables["version"] ##}}}
-
+	
 	def parse_getstatus_players(self, data): ##{{{
 		"""
 		Parse players portion of getstatus response.
@@ -166,29 +156,27 @@ class Parser(object): ##{{{
 	def getstatus(self): ##{{{
 		"""
 		Basic server query for public information only.
-		TODO fix fake ping, but its better than nothing for now
 		"""
-		start = time.clock()
 		status, data = self.connection.command("getstatus")
 		if status == "statusResponse":
 			self.parse_getstatus(data) ##}}}
-		self.ping = 1000*(time.clock() - start)
-	## }}}
 
-class Guest(Server, Parser): ##{{{
-	"""
-	Server implementation that cannot perform any RCON
-	commands. The right class if you are browsing some
-	random servers.
-	"""
-	def __init__(self, host, port, filter_colors=False): ##{{{
+	def getPing(self): ##{{{
 		"""
-		TODO
+		Super hacky!
 		"""
-		Server.__init__(self, filter_colors)
-		self.connection = connection.Connection(host, port, retries=1)
-		self.host = host
-		self.port = port ##}}}
+		proc = subprocess.Popen( ['ping', '-c', '3', '-w', '2', self.host], stdout=subprocess.PIPE )
+		for line in proc.stdout:
+			found = re.search( REs.PING, line )
+			if found:
+				self.ping = float(found.group(1))
+				return
+		##}}}
+
+	def __str__(self): ##{{{
+		"""Short summary of name, address, and map."""
+		return ("Server<name: %s; address: %s; map: %s>" %
+			(self.name, self.address(), self.map)) ##}}}
 
 	##}}}
 
@@ -214,3 +202,6 @@ def MasterServer(host, port=27950, protocol=12, options="full empty", timeout=1)
 			server += str((ord(sdata[5])<<8) + ord(sdata[6]))
 			servers.add(server)
 	return servers ##}}}
+
+if __name__=='__main__':
+	print MasterServer('dpmaster.deathmask.net')
