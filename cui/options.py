@@ -17,13 +17,14 @@ class Settings(object):
 			'wsw0.6_args' : '',
 			'wsw0.7_args' : '',
 			'pingservers' : 'true',
+			'favservers' : 'true',
 			}
 
 	wsw6defaults = {
 		'master1' : 'dpmaster.deathmask.net',
-		'master2' : 'ghdigital.com',
-		'master3' : 'excalibur.nvg.ntnu.no',
-		'master4' : 'eu.master.warsow.net',
+		#'master2' : 'ghdigital.com',
+		#'master3' : 'excalibur.nvg.ntnu.no',
+		#'master4' : 'eu.master.warsow.net',
 		'port' : '27950',
 		'protocol' : '12',
 		'options' : 'full empty'
@@ -31,13 +32,14 @@ class Settings(object):
 
 	wsw7defaults = {
 		'master1' : 'dpmaster.deathmask.net',
-		'master2' : 'ghdigital.com',
-		'master3' : 'excalibur.nvg.ntnu.no',
-		'master4' : 'eu.master.warsow.net',
+		#'master2' : 'ghdigital.com',
+		#'master3' : 'excalibur.nvg.ntnu.no',
+		#'master4' : 'eu.master.warsow.net',
 		'port' : '27950',
 		'protocol' : '6094',
 		'options' : 'full empty'
 		}
+
 
 	def __init__(self):
 		self.cp = ConfigParser.SafeConfigParser()
@@ -46,6 +48,35 @@ class Settings(object):
 			self.initCfg()
 		else:
 			self.cp.read( self.cfg )
+	
+	def addFav(self, host):
+		if self.cp.getboolean( 'General', 'wsw_0.6' ):
+			section = 'Favorites 0.6'
+		else:
+			section = 'Favorites 0.7'
+		nextfav = len( self.cp.options( section ) )
+		while self.cp.has_option( section , 'srv%03d' % nextfav ):
+			nextfav += 1
+		self.cp.set( section , 'srv%03d' % nextfav , host )
+
+	def delFav(self, host):
+		if self.cp.getboolean( 'General', 'wsw_0.6' ):
+			section = 'Favorites 0.6'
+		else:
+			section = 'Favorites 0.7'
+		for k,v in self.cp.items( section ):
+			if v == host: self.cp.remove_option( section, k )
+
+	def getFav(self):
+		if self.cp.getboolean( 'General', 'wsw_0.6' ):
+			section = 'Favorites 0.6'
+		else:
+			section = 'Favorites 0.7'
+		for key, val in self.cp.items( section ):
+			yield val
+
+	def getFav2(self):
+		return self.cp.getboolean( 'General', 'favservers' )
 	
 	def getPath(self):
 		if self.cp.getboolean( 'General', 'wsw_0.6' ):
@@ -87,6 +118,10 @@ class Settings(object):
 		self.cp.add_section( 'Warsow 0.7' )
 		for k, v in self.wsw7defaults.items():
 			self.cp.set( 'Warsow 0.7', k, v )
+
+		self.cp.add_section( 'Favorites 0.6' )
+
+		self.cp.add_section( 'Favorites 0.7' )
 		self.writeCfg()
 
 	def writeCfg(self):
@@ -96,4 +131,4 @@ class Settings(object):
 
 if __name__ == '__main__':
 	sets = Settings()
-	print sets.getMasters()
+	print sets.getFav2()

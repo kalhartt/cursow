@@ -65,11 +65,11 @@ class App(object):
 				self.srvlst.move( 5 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == ord('a') or key == curses.KEY_LEFT:
+			elif key == ord('a') or key == ord('n') or key == curses.KEY_LEFT:
 				self.srvlst.sort( n=-1 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == ord('d') or key == curses.KEY_RIGHT:
+			elif key == ord('d') or key == ord('i') or key == curses.KEY_RIGHT:
 				self.srvlst.sort( n=1 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
@@ -80,6 +80,15 @@ class App(object):
 			elif key == curses.KEY_NPAGE:
 				self.srvlst.move( self.srvlst.h-3 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
+
+			elif key == ord('f'):
+				srv = self.srvlst.items[ self.srvlst.firstrow + self.srvlst.pos ]
+				self.settings.addFav( '%s:%d' % ( srv.host , srv.port ) )
+
+			elif key == ord('F'):
+				srv = self.srvlst.items[ self.srvlst.firstrow + self.srvlst.pos ]
+				self.settings.delFav( '%s:%d' % ( srv.host , srv.port ) )
+
 
 			elif key == ord('\t'):
 				self.serverips = set()
@@ -117,17 +126,27 @@ class App(object):
 		server = self.srvlst.items[self.srvlst.firstrow+self.srvlst.pos]
 		path, args = self.settings.getPath()
 		runlist = [ path , args , 'connect', '%s:%d' % (server.host, server.port) ]
-		subprocess.Popen( runlist, stdout=file(os.devnull, 'w') )
+		#subprocess.Popen( runlist, stdout=file(os.devnull, 'w') )
+		subprocess.Popen( runlist )
 	
 	def queryMasters(self):
-		for host, port, protocol, opts  in self.settings.getMasters():
-			try:
-				self.status.disp( 'Querying Master Server: %s %d %d %s' % (host, port, protocol, opts) )
+		if self.settings.getFav2():
+			for host in self.settings.getFav():
+				self.status.disp( 'Adding Favorite: %s' % (host) )
+				if self.quit:
+					return
+				self.serverips.add( host )
 				curses.doupdate()
-				time.sleep(1)
-				self.serverips = self.serverips | server.MasterServer( host, port=port, protocol=protocol, options=opts )
-			except:
-				continue
+		else:
+			for host, port, protocol, opts  in self.settings.getMasters():
+				if self.quit:
+					return
+				try:
+					self.status.disp( 'Querying Master Server: %s %d %d %s' % (host, port, protocol, opts) )
+					curses.doupdate()
+					self.serverips = self.serverips | server.MasterServer( host, port=port, protocol=protocol, options=opts )
+				except:
+					continue
 		self.mainThread = threading.Thread(target=self.processServers)
 		self.mainThread.start()
 	
