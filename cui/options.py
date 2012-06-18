@@ -120,8 +120,9 @@ class options(object):
 			self.cp.set( 'Warsow 0.7', k, v )
 
 		self.cp.add_section( 'Favorites 0.6' )
-
 		self.cp.add_section( 'Favorites 0.7' )
+		self.cp.add_section( 'Friends' )
+
 		self.writeCfg()
 
 	def writeCfg(self):

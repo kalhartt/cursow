@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
-__all__ = ['color', 'options', 'widgets']
+__all__ = ['color', 'options', 'panFilter', 'widStatus', 'widSrvlst']
 
-from .color import color
+from . import color
 from .options import options
-import widgets
+from .widStatus import widStatus
+from .widSrvlst import widSrvlst
+from .panFilter import panFilter

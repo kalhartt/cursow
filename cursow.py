@@ -26,9 +26,9 @@ class cursow(object):
 		self.mainpan = panel.new_panel( self.mainwin )
 		self.fltrpan = panel.new_panel( self.fltrwin )
 		self.fltrpan.top()
-		self.status = cui.widgets.statusBar( self.mainwin )
-		self.srvlst = cui.widgets.serverList( self.mainwin )
-		self.filter = cui.widgets.filterPane( self.fltrwin )
+		self.status = cui.widStatus( self.mainwin )
+		self.srvlst = cui.widSrvlst( self.mainwin )
+		self.filter = cui.panFilter( self.fltrwin )
 
 		## Import servers
 		self.mainThread = threading.Thread(target=self.queryMasters)
