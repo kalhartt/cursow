@@ -25,7 +25,6 @@ class cursow(object):
 		self.fltrwin = curses.newwin( curses.LINES-4, curses.COLS-8, 2,4)
 		self.mainpan = panel.new_panel( self.mainwin )
 		self.fltrpan = panel.new_panel( self.fltrwin )
-		self.fltrpan.top()
 		self.status = cui.widStatus( self.mainwin )
 		self.srvlst = cui.widSrvlst( self.mainwin )
 		self.filter = cui.panFilter( self.fltrwin )
@@ -47,48 +46,47 @@ class cursow(object):
 					time.sleep(0.2)
 				break
 
-			elif key == ord('w') or key == ord('u') or key == curses.KEY_UP:
+			elif key in cui.KEY_UP:
 				self.srvlst.move( -1 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == ord('s') or key == ord('e') or key == curses.KEY_DOWN:
+			elif key in cui.KEY_DOWN:
 				self.srvlst.move( 1 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == ord('W') or key == ord('U'):
+			elif key in cui.KEY_UP5:
 				self.srvlst.move( -5 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == ord('S') or key == ord('E'):
+			elif key in cui.KEY_DOWN5:
 				self.srvlst.move( 5 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == ord('a') or key == ord('n') or key == curses.KEY_LEFT:
+			elif key in cui.KEY_LEFT:
 				self.srvlst.sort( n=-1 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == ord('d') or key == ord('i') or key == curses.KEY_RIGHT:
+			elif key in cui.KEY_RIGHT:
 				self.srvlst.sort( n=1 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == curses.KEY_PPAGE:
+			elif key in cui.KEY_PGUP:
 				self.srvlst.move( 3-self.srvlst.h )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == curses.KEY_NPAGE:
+			elif key in cui.KEY_PGDOWN:
 				self.srvlst.move( self.srvlst.h-3 )
 				self.status.disp( 'pos: %d\trow: %d\theight: %d\titems: %d' % (self.srvlst.pos, self.srvlst.firstrow, self.srvlst.h, len(self.srvlst.items)) )
 
-			elif key == ord('f'):
+			elif key in cui.KEY_ADDFAV:
 				srv = self.srvlst.items[ self.srvlst.firstrow + self.srvlst.pos ]
 				self.settings.addFav( '%s:%d' % ( srv.host , srv.port ) )
 
-			elif key == ord('F'):
+			elif key in cui.KEY_DELFAV:
 				srv = self.srvlst.items[ self.srvlst.firstrow + self.srvlst.pos ]
 				self.settings.delFav( '%s:%d' % ( srv.host , srv.port ) )
 
-
-			elif key == ord('\t'):
+			elif key in cui.KEY_TOGGAME:
 				self.serverips = set()
 				self.quit = True
 				self.status.disp( 'Stopping active threads...' )
@@ -101,7 +99,7 @@ class cursow(object):
 				self.mainThread = threading.Thread(target=self.queryMasters)
 				self.mainThread.start()
 
-			elif key == ord('\n') or key == ord('\r'):
+			elif key in cui.KEY_LAUNCH:
 				self.quit = True
 				self.settings.writeCfg()
 				self.status.disp( 'Stopping active threads...' )
@@ -111,12 +109,18 @@ class cursow(object):
 				self.launch()
 				break
 
-			elif key == ord('x'):
+			elif key in cui.KEY_FILTER:
 				if self.fltrpan.hidden():
+					self.srvlst.pause()
 					self.fltrpan.show()
+					self.fltrpan.top()
 				else:
+					self.srvlst.unpause()
 					self.fltrpan.hide()
 				panel.update_panels()
+
+			else:
+				self.status.disp( 'No function on key: %s' % key )
 
 			curses.doupdate()
 	

@@ -17,10 +17,13 @@ class widSrvlst(object):
 		self.win.clear()
 		## Item containers
 		## items holds each server
+		## fitems is items matching current filter
 		## ditems holds currently displayed servers
 		self.items = []
+		self.fitems = []
 		self.ditems = {}
 		self.pos = 0
+		self.paused = False
 		self.firstrow = 0
 		self.reverse = False
 		self.sortcol = 5
@@ -51,6 +54,9 @@ class widSrvlst(object):
 		## }}}
 
 	def disp(self): ##{{{
+		if self.paused:
+			return
+
 		y0 = self.firstrow
 		for y in range(self.h-2):
 			if y0+y >= len(self.items):
@@ -122,7 +128,13 @@ class widSrvlst(object):
 		self.prntCol()
 		self.disp()
 		## }}}
-	
+
+	def pause(self):
+		self.paused = True
+
+	def unpause(self):
+		self.paused = False
+
 	def prnt(self, y, x, w, msg, mode=0): ##{{{
 		color = curses.color_pair(1)
 
