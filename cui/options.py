@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import os.path, ConfigParser
 
-class Settings(object):
+class options(object):
 	""" Settings class
 
 	All of this just to avoid having a
@@ -17,7 +17,7 @@ class Settings(object):
 			'wsw0.6_args' : '',
 			'wsw0.7_args' : '',
 			'pingservers' : 'true',
-			'favservers' : 'true',
+			'favservers' : 'false',
 			}
 
 	wsw6defaults = {
@@ -130,5 +130,5 @@ class Settings(object):
 		cfgfile.close()
 
 if __name__ == '__main__':
-	sets = Settings()
+	sets = options()
 	print sets.getFav2()
