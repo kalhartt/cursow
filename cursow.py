@@ -31,6 +31,7 @@ class cursow(object):
 		self.status = cui.widStatus( self.mainwin )
 		self.srvlst = cui.widSrvlst( self.mainwin )
 		self.filter = cui.panFilter( self.fltrwin, self.settings )
+		self.srvlst.setFilter( self.filter.getFilter() )
 
 		## Import servers
 		self.mainThread = threading.Thread(target=self.queryMasters)
@@ -113,13 +114,19 @@ class cursow(object):
 				break
 
 			elif key in cui.KEY_FILTER:
-				if self.fltrpan.hidden():
-					self.srvlst.pause()
-					self.fltrpan.show()
-					self.fltrpan.top()
-				else:
-					self.srvlst.unpause()
-					self.fltrpan.hide()
+				## Show filter menu
+				self.srvlst.pause()
+				self.fltrpan.show()
+				self.fltrpan.top()
+				panel.update_panels()
+
+				## Get new filter
+				self.filter.focus()
+				self.srvlst.setFilter( self.filter.getFilter() )
+
+				## Hide again
+				self.srvlst.unpause()
+				self.fltrpan.hide()
 				panel.update_panels()
 
 			else:
@@ -138,7 +145,7 @@ class cursow(object):
 			os.execv( path, runlist )
 	
 	def queryMasters(self):
-		if self.settings.getFav2():
+		if self.settings.showFavorites():
 			for host in self.settings.getFav():
 				self.status.disp( 'Adding Favorite: %s' % (host) )
 				if self.quit:
@@ -165,8 +172,8 @@ class cursow(object):
 			srv = server.Server( host[0], int(host[1]) )
 			srv.getstatus()
 			if self.settings.getPing(): srv.getPing()
-			self.mods.add( srv.mod )
-			self.gametypes.add( srv.gametype )
+			self.filter.addMod( srv.mod )
+			self.filter.addGametype( srv.gametype )
 			self.srvlst.add( srv )
 			curses.doupdate()
 		except Exception as err:

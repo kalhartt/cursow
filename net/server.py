@@ -106,6 +106,7 @@ class Server(object): ##{{{
 		self.name2 = re.sub( REs.STRIPCOLOR, '', self.name )
 		self.game = self.variables.get('gamename', '')
 		self.gametype = self.variables["gametype"]
+		self.instagib = int(self.variables.get( 'g_instagib', 0 ))
 		self.map = self.variables["mapname"]
 		self.maxclients= int(self.variables["sv_maxclients"])
 		self.mod = self.variables["fs_game"]

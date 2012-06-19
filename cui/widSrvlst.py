@@ -22,6 +22,7 @@ class widSrvlst(object):
 		self.items = []
 		self.fitems = []
 		self.ditems = {}
+		self.filter = lambda x: True
 		self.pos = 0
 		self.paused = False
 		self.firstrow = 0
@@ -40,6 +41,8 @@ class widSrvlst(object):
 	
 	def add(self, item): ## {{{
 		self.items.append( item )
+		if self.filter( item ):
+			self.fitems.append( item )
 		self.sort()
 		## }}}
 
@@ -49,6 +52,7 @@ class widSrvlst(object):
 		self.pos = 0
 		self.firstrow = 0
 		self.items = []
+		self.fitems = []
 		self.ditems = {}
 		self.disp()
 		## }}}
@@ -59,10 +63,10 @@ class widSrvlst(object):
 
 		y0 = self.firstrow
 		for y in range(self.h-2):
-			if y0+y >= len(self.items):
+			if y0+y >= len(self.fitems):
 				break
 
-			item = self.items[y0+y]
+			item = self.fitems[y0+y]
 			if item == self.ditems.get(y, ''):
 				continue
 			else:
@@ -81,16 +85,16 @@ class widSrvlst(object):
 	def move(self, n): ##{{{
 		self.pos += n
 
-		if self.pos >= len(self.items):
+		if self.pos >= len(self.fitems):
 			## End of list, does not reach bottom of window
 			self.ditems[self.pos-n] = ''
-			self.pos = len(self.items)-1
+			self.pos = len(self.fitems)-1
 			self.ditems[self.pos] = ''
 		elif self.pos > self.h-3:
 			## Bottom of window, do we scroll?
-			if self.firstrow + self.h-3 < len(self.items):
+			if self.firstrow + self.h-3 < len(self.fitems):
 				## we can scroll
-				self.firstrow += min( len(self.items) - self.firstrow-self.h+2 , self.pos-self.h+3 )
+				self.firstrow += min( len(self.fitems) - self.firstrow-self.h+2 , self.pos-self.h+3 )
 				self.pos = self.h - 3
 				self.ditems = {}
 			else:
@@ -128,6 +132,19 @@ class widSrvlst(object):
 		self.prntCol()
 		self.disp()
 		## }}}
+
+	def setFilter(self, flt):
+		self.filter = flt
+		self.filterAll()
+	
+	def filterAll(self):
+		self.win.move(1,0)
+		self.win.clrtobot()
+		self.pos = 0
+		self.firstrow = 0
+		self.ditems = {}
+		self.fitems = filter( self.filter, self.items )
+		self.disp()
 
 	def pause(self):
 		self.paused = True

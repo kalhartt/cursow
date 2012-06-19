@@ -82,7 +82,7 @@ class options(object):
 		for key, val in self.cp.items( section ):
 			yield val
 
-	def getFav2(self):
+	def showFavorites(self):
 		return self.cp.getboolean( 'Display', 'Show Favorites' )
 	
 	def getPath(self):
@@ -106,9 +106,12 @@ class options(object):
 			if 'master' in k:
 				yield v, port, protocol, options 
 
+	def getOpt(self, section, option ):
+		return self.cp.get( section, option )
+	
 	def setOpt(self, section, option, value):
 		self.cp.set( section, option, value )
-	
+
 	def switchVer(self):
 		ver = not self.cp.getboolean( 'General', 'wsw_0.6' )
 		self.cp.set( 'General', 'wsw_0.6', str(ver) )
