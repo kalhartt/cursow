@@ -10,14 +10,21 @@ class options(object):
 	"""
 
 	cfg = os.path.expanduser('~/.cursow')
+
 	gendefaults = {
 			'wsw_0.6' : 'true',
 			'wsw0.6_path' : '/opt/warsow',
 			'wsw0.7_path' : '/opt/warsow2',
 			'wsw0.6_args' : '',
 			'wsw0.7_args' : '',
-			'pingservers' : 'true',
-			'favservers' : 'false',
+			}
+
+	dispdefaults = {
+			'Ping Servers' : 'true',
+			'Show Favorites' : 'false',
+			'Instagib' : 'show all',
+			'Gametype' : 'all',
+			'Mod' : 'all',
 			}
 
 	wsw6defaults = {
@@ -76,7 +83,7 @@ class options(object):
 			yield val
 
 	def getFav2(self):
-		return self.cp.getboolean( 'General', 'favservers' )
+		return self.cp.getboolean( 'Display', 'Show Favorites' )
 	
 	def getPath(self):
 		if self.cp.getboolean( 'General', 'wsw_0.6' ):
@@ -85,7 +92,7 @@ class options(object):
 			return os.path.expanduser( self.cp.get( 'General' , 'wsw0.7_path' ) ) , self.cp.get( 'General' , 'wsw0.7_args' ) 
 
 	def getPing(self):
-		return self.cp.getboolean( 'General', 'pingservers' )
+		return self.cp.getboolean( 'Display', 'Ping Servers' )
 	
 	def getMasters(self):
 		if self.cp.getboolean( 'General', 'wsw_0.6' ):
@@ -110,6 +117,10 @@ class options(object):
 		self.cp.add_section( 'General' )
 		for k, v in self.gendefaults.items():
 			self.cp.set( 'General', k, v )
+
+		self.cp.add_section( 'Display' )
+		for k, v in self.dispdefaults.items():
+			self.cp.set( 'Display', k, v )
 
 		self.cp.add_section( 'Warsow 0.6' )
 		for k, v in self.wsw6defaults.items():

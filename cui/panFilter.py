@@ -2,15 +2,17 @@
 
 class panFilter(object):
 	opts = {
-			'instagib' : 'show',
-			'gametype' : 'all',
-			'full' : 'show',
-			'empty' : 'show',
+			'instagib' : ['show all', 'show only', 'hide'],
+			'gametype' : ['all'],
 			}
 
-	def __init__(self, win):
+	def __init__(self, win, opts):
 		self.h, self.w = win.getmaxyx()
+		self.options = opts
+		self.pos = 0
 		self.win = win
 		self.win.clrtobot()
 		self.win.box()
-		self.pos = 0
+	
+	def disp(self, mods, gametypes):
+		pass
