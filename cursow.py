@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import curses, threading, time, os
+import curses, threading, time, os, sys
 from curses import panel
 
 import cui
@@ -130,12 +130,22 @@ class cursow(object):
 	def launch(self):
 		server = self.srvlst.items[self.srvlst.firstrow+self.srvlst.pos]
 		path, args = self.settings.getPath()
-		runlist = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
-		if os.fork():
-			return
+
+		if sys.platform == 'cygwin':
+			if os.fork():
+				return
+			else:
+				runlist = [ 'warsow', '-d', os.path.dirname(path), path, args, 'connect', '%s:%d' % (server.host, server.port) ]
+				os.setsid()
+				os.execv( '/usr/bin/cygstart', runlist )
+
 		else:
-			os.setsid()
-			os.execv( path, runlist )
+			if os.fork():
+				return
+			else:
+				runlist = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
+				os.setsid()
+				os.execv( path, runlist )
 	
 	def queryMasters(self):
 		if self.settings.getFav2():
