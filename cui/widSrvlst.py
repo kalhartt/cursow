@@ -3,7 +3,7 @@ import curses
 
 class column(object):
 	def __init__(self, width, data, sort, title):
-		self.w = width
+		self.w = width # self.w > 1, then width in pixels, self.w<1 then percentage free space
 		self.data = data # function to return display data, ie: data = lambda x: x.name
 		self.sort = sort # key function for sorted()
 		self.title = title
@@ -32,11 +32,20 @@ class widSrvlst(object):
 		## Make columns
 		col0 = column(3, lambda x: '%03d' % x.ping, lambda x: x.ping, 'png')
 		col1 = column(5, lambda x: '%s/%s' % (x.clients, x.maxclients), lambda x: x.clients, 'plyrs')
-		col2 = column(int(0.2*(self.w-13)), lambda x: x.map, lambda x: x.map.lower(), 'map')
-		col3 = column(int(0.2*(self.w-13)), lambda x: x.mod, lambda x: x.mod.lower(), 'mod')
-		col4 = column(int(0.2*(self.w-13)), lambda x: x.gametype, lambda x: x.gametype.lower(), 'gametype')
-		col5 = column(int(0.4*(self.w-13)), lambda x: x.name, lambda x: x.name.lower(), 'name')
+		col2 = column(0.2, lambda x: x.map, lambda x: x.map.lower(), 'map')
+		col3 = column(0.2, lambda x: x.mod, lambda x: x.mod.lower(), 'mod')
+		col4 = column(0.2, lambda x: x.gametype, lambda x: x.gametype.lower(), 'gametype')
+		col5 = column(0.4, lambda x: x.name, lambda x: x.name.lower(), 'name')
 		self.columns = [ col0, col1, col2, col3, col4, col5 ]
+
+		## calculate width to distribute between
+		## relative column sizes
+		self.skipwidth = -1
+		for col in self.columns:
+			if col.w >= 1:
+				self.skipwidth += col.w
+			self.skipwidth += 1
+
 		## }}}
 	
 	def add(self, item): ## {{{
@@ -77,8 +86,9 @@ class widSrvlst(object):
 			self.win.addstr(1+y,0, ' '*self.w, mode)
 
 			for col in self.columns:
-				self.prnt(1+y, x, col.w, col.data( item ), mode)
-				x += col.w+1
+				width = int(col.w*(self.w-self.skipwidth)) if col.w <1 else col.w
+				self.prnt(1+y, x, width, col.data( item ), mode)
+				x += width+1
 		self.win.noutrefresh()
 		## }}}
 	
@@ -133,24 +143,41 @@ class widSrvlst(object):
 		self.disp()
 		## }}}
 
-	def setFilter(self, flt):
+	def setFilter(self, flt): ## {{{
 		self.filter = flt
 		self.filterAll()
+		## }}}
 	
-	def filterAll(self):
+	def filterAll(self):#{{{
 		self.win.move(1,0)
 		self.win.clrtobot()
 		self.pos = 0
 		self.firstrow = 0
 		self.ditems = {}
 		self.fitems = filter( self.filter, self.items )
-		self.disp()
+		self.disp()#}}}
 
-	def pause(self):
-		self.paused = True
+	def resize(self):
+		self.win.move( 1, 0 )
+		self.win.clrtobot()
+		h, w = parwin.getmaxyx()
+		self.h = height-2
+		self.w = width-2
+		## calculate width to distribute between
+		## relative column sizes
+		self.skipwidth = -1
+		for col in self.columns:
+			if col.w >= 1:
+				self.skipwidth += col.w
+			self.skipwidth += 1
 
-	def unpause(self):
-		self.paused = False
+
+
+	def pause(self):#{{{
+		self.paused = True#}}}
+
+	def unpause(self):#{{{
+		self.paused = False#}}}
 
 	def prnt(self, y, x, w, msg, mode=0): ##{{{
 		color = curses.color_pair(1)
@@ -194,7 +221,8 @@ class widSrvlst(object):
 				mode = curses.A_REVERSE
 			else:
 				mode = curses.A_NORMAL
-			self.win.addstr( 0, x, col.title[:col.w].ljust(col.w), color|mode )
-			x += col.w+1
+			width = int(col.w*(self.w-self.skipwidth)) if col.w <1 else col.w
+			self.win.addstr( 0, x, col.title[:width].ljust(width), color|mode )
+			x += width+1
 		self.win.noutrefresh()
 		## }}}
