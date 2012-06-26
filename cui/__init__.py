@@ -11,9 +11,10 @@ import curses
 
 ## Program Functions
 KEY_QUIT = [ ord(x) for x in 'qQ' ]
-KEY_REFRESH = [ curses.KEY_F5 ]
 KEY_HELP = [ curses.KEY_F1 ]
 KEY_FILTER = [ curses.KEY_F2 ]
+KEY_STOP = [ curses.KEY_F3 ]
+KEY_REFRESH = [ curses.KEY_F4 ]
 KEY_LAUNCH = [ ord(x) for x in '\n\r' ]
 KEY_TOGGAME = [ ord(x) for x in '\t' ]
 KEY_ADDFAV = [ ord(x) for x in 'f' ]
