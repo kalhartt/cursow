@@ -25,13 +25,16 @@ class cursow(object):
 		## screen objects
 		self.stdscr = screen
 		self.mainwin = curses.newwin(0,0)
-		self.fltrwin = curses.newwin( curses.LINES-4, curses.COLS-8, 2,4)
 		self.mainpan = panel.new_panel( self.mainwin )
-		self.fltrpan = panel.new_panel( self.fltrwin )
+
+		self.tabwin = curses.newwin( curses.LINES-4, curses.COLS-8, 2,4)
+		self.tabcon = cui.panTabbedContainer( self.tabwin, self.settings )
+		self.tabcon.addWidget( 'Filter1', cui.panFilter )
+		self.tabcon.addWidget( 'Filter2', cui.panFilter )
+
 		self.status = cui.widStatus( self.mainwin )
 		self.srvlst = cui.widSrvlst( self.mainwin )
-		self.filter = cui.panFilter( self.fltrwin, self.settings )
-		self.srvlst.setFilter( self.filter.getFilter() )
+		self.srvlst.setFilter( lambda x: True )
 
 		## Import servers
 		self.mainThread = threading.Thread(target=self.queryMasters)
@@ -101,18 +104,15 @@ class cursow(object):
 			elif key in cui.KEY_FILTER:
 				## Show filter menu
 				self.srvlst.pause()
-				self.fltrpan.show()
-				self.fltrpan.top()
-				panel.update_panels()
+				self.tabcon.show()
+				curses.doupdate()
 
-				## Get new filter
-				self.filter.focus()
-				self.srvlst.setFilter( self.filter.getFilter() )
+				self.stdscr.getch()
 
-				## Hide again
+				self.tabcon.hide()
 				self.srvlst.unpause()
-				self.fltrpan.hide()
-				panel.update_panels()
+				curses.doupdate()
+				
 
 			elif key in cui.KEY_STOP:
 				self.stopServers()
@@ -125,7 +125,7 @@ class cursow(object):
 
 			curses.doupdate()
 	
-	def queryMasters(self):
+	def queryMasters(self):#{{{
 		if self.settings.showFavorites():
 			for host in self.settings.getFav():
 				self.status.disp( 'Adding Favorite: %s' % (host) )
@@ -144,41 +144,39 @@ class cursow(object):
 				except:
 					continue
 		self.mainThread = threading.Thread(target=self.processServers)
-		self.mainThread.start()
+		self.mainThread.start()#}}}
 	
-	def processServer(self, ip):
+	def processServer(self, ip):#{{{
 		try:
 			self.status.disp( 'Querying Server: %s' % (ip) )
 			host = ip.split(':')
 			srv = server.Server( host[0], int(host[1]) )
 			srv.getstatus()
 			if self.settings.getPing(): srv.getPing()
-			self.filter.addMod( srv.mod )
-			self.filter.addGametype( srv.gametype )
 			self.srvlst.addServer( srv )
 			curses.doupdate()
 		except Exception as err:
 			self.status.disp( 'Querying Server: %s' % (err) )
 			curses.doupdate()
-		return
+		return#}}}
 
-	def processServers(self):
+	def processServers(self):#{{{
 		for ip in self.serverips:
 			if self.stop:
 				break
 			if threading.activeCount() > 5:
 				time.sleep(0.1)
 			thread = threading.Thread(target=self.processServer, args=[ip])
-			thread.start()
+			thread.start()#}}}
 
 	## Functions bound to keys
-	def addFav(self):
+	def addFav(self):#{{{
 		srv = self.srvlst.getServer()
-		self.settings.addFav( '%s:%d' % ( srv.host , srv.port ) )
+		self.settings.addFav( '%s:%d' % ( srv.host , srv.port ) )#}}}
 	
-	def delFav(self):
+	def delFav(self):#{{{
 		srv = self.srvlst.getServer()
-		self.settings.delFav( '%s:%d' % ( srv.host , srv.port ) )
+		self.settings.delFav( '%s:%d' % ( srv.host , srv.port ) )#}}}
 
 	def launch(self): ## {{{
 		server = self.srvlst.getServer()

@@ -7,8 +7,8 @@ class panFilter(object):
 	optVals = [ ['true', 'false'], ['true', 'false'], ['show all', 'show only', 'hide'], ['all'], ['all'] ]
 
 	def __init__(self, win, opts):
-		self.h, self.w = win.getmaxyx()
 		self.options = opts
+		self.h, self.w = win.getmaxyx()
 		self.pos = 0
 		self.win = win
 		self.win.keypad(1)
