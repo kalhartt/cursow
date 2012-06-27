@@ -48,12 +48,14 @@ class widSrvlst(object):
 
 		## }}}
 	
-	def add(self, item): ## {{{
+	def addServer(self, item): ## {{{
 		self.items.append( item )
-		if self.filter( item ):
-			self.fitems.append( item )
+		if self.filter( item ): self.fitems.append( item )
 		self.sort()
 		## }}}
+
+	def getServer(self):#{{{
+		return self.fitems[ self.pos + self.firstrow ]#}}}
 
 	def clear(self): ##{{{
 		self.win.move( 1, 0 )
@@ -138,7 +140,7 @@ class widSrvlst(object):
 		if n:
 			self.sortcol = (self.sortcol + n) % len( self.columns )
 		sortkey = self.columns[ self.sortcol ].sort
-		self.items = sorted( self.items, key=sortkey, reverse=self.reverse )
+		self.fitems = sorted( self.fitems, key=sortkey, reverse=self.reverse )
 		self.prntCol()
 		self.disp()
 		## }}}
@@ -157,7 +159,7 @@ class widSrvlst(object):
 		self.fitems = filter( self.filter, self.items )
 		self.disp()#}}}
 
-	def resize(self):
+	def resize(self): #{{{
 		self.win.move( 1, 0 )
 		self.win.clrtobot()
 		h, w = parwin.getmaxyx()
@@ -169,9 +171,7 @@ class widSrvlst(object):
 		for col in self.columns:
 			if col.w >= 1:
 				self.skipwidth += col.w
-			self.skipwidth += 1
-
-
+			self.skipwidth += 1#}}}
 
 	def pause(self):#{{{
 		self.paused = True#}}}

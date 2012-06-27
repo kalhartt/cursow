@@ -70,12 +70,10 @@ class cursow(object):
 				self.navigate( self.srvlst.h - 3 )
 
 			elif key in cui.KEY_ADDFAV:
-				srv = self.srvlst.items[ self.srvlst.firstrow + self.srvlst.pos ]
-				self.settings.addFav( '%s:%d' % ( srv.host , srv.port ) )
+				self.addFav()
 
 			elif key in cui.KEY_DELFAV:
-				srv = self.srvlst.items[ self.srvlst.firstrow + self.srvlst.pos ]
-				self.settings.delFav( '%s:%d' % ( srv.host , srv.port ) )
+				self.delFav()
 
 			elif key in cui.KEY_TOGGAME:
 				self.serverips = set()
@@ -133,7 +131,7 @@ class cursow(object):
 				self.status.disp( 'Adding Favorite: %s' % (host) )
 				if self.stop:
 					return
-				self.serverips.add( host )
+				self.serverips.addServer( host )
 				curses.doupdate()
 		else:
 			for host, port, protocol, opts  in self.settings.getMasters():
@@ -157,7 +155,7 @@ class cursow(object):
 			if self.settings.getPing(): srv.getPing()
 			self.filter.addMod( srv.mod )
 			self.filter.addGametype( srv.gametype )
-			self.srvlst.add( srv )
+			self.srvlst.addServer( srv )
 			curses.doupdate()
 		except Exception as err:
 			self.status.disp( 'Querying Server: %s' % (err) )
@@ -174,26 +172,36 @@ class cursow(object):
 			thread.start()
 
 	## Functions bound to keys
+	def addFav(self):
+		srv = self.srvlst.getServer()
+		self.settings.addFav( '%s:%d' % ( srv.host , srv.port ) )
+	
+	def delFav(self):
+		srv = self.srvlst.getServer()
+		self.settings.delFav( '%s:%d' % ( srv.host , srv.port ) )
 
 	def launch(self): ## {{{
-		server = self.srvlst.items[self.srvlst.firstrow+self.srvlst.pos]
+		server = self.srvlst.getServer()
 		path, args = self.settings.getPath()
 
 		if sys.platform == 'cygwin':
-			if os.fork():
-				return
-			else:
-				runlist = [ 'warsow', '-d', os.path.dirname(path), path, args, 'connect', '%s:%d' % (server.host, server.port) ]
-				os.setsid()
-				os.execv( '/usr/bin/cygstart', runlist )
-
+			prog = '/usr/bin/cygstart'
+			runlist = [ 'warsow', '-d', os.path.dirname(path), path, args, 'connect', '%s:%d' % (server.host, server.port) ]
 		else:
-			if os.fork():
-				return
-			else:
-				runlist = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
-				os.setsid()
-				os.execv( path, runlist )
+			prog = path
+			runlist = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
+
+		if os.fork():
+			self.stop = True
+			self.settings.writeCfg()
+			self.status.disp( 'Stopping active threads...' )
+			curses.doupdate()
+			while threading.activeCount() > 1:
+				time.sleep(0.2)
+			return
+		else:
+			os.setsid()
+			os.execv( prog, runlist )
 		## }}}
 	
 	def navigate(self, n): ## {{{
