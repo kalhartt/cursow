@@ -24,6 +24,12 @@ class columnList(widget):
 	"""
 	Displays a list of data with columns
 	List can be sorted and filtered arbitrarily
+
+	Inherited methods:
+	hide(self)
+	show(self)
+	getPanel(self)
+	getWindow(self)
 	"""
 
 	def __init__(self, window):
@@ -37,3 +43,51 @@ class columnList(widget):
 		self.filtered_items = []
 		self.displayed_items = {} # Dictionary is convenience to avoid some invalid-index checks
 		super( statusContainer, self ).__init__( window )
+
+	def resize(self, height, width, y0=self.y0, x0=self.x0):#{{{
+		"""
+		Resize and/or move the window
+
+		arguments:
+		height -- resized height
+		width -- resized width
+		y0 -- y coord of new top-left corner (default = self.y0)
+		x0 -- x coord of new top-left corner (default = self.x0)
+		"""
+		self.scaleColumns()
+		super( columnList, self ).resize( height, width, y0, x0 )#}}}
+
+	def display(self):
+		pass
+
+	def clear(self):#{{{
+		"""
+		Clear the display and mark all rows
+		of the list for refresh
+		"""
+		self.displayed_items = {}
+		super( columnList , self ).clear()#}}}
+
+	def focus( self ):
+		pass
+
+	def handleInput( self ):
+		pass
+
+	def addItem(self, item):
+		pass
+
+	def getItem(self, index):
+		pass
+
+	def getItems(self):
+		pass
+
+	def getFilteredItems(self):
+		pass
+
+	def getSelectedItem(self):
+		pass
+
+	def scaleColumns(self):
+		pass
