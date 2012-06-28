@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 import curses
 from curses import panel
+from .widget import widget
 from .common import *
 
 class tabbedContainer(widget):
@@ -8,6 +9,12 @@ class tabbedContainer(widget):
 	Container widget with a tab-bar at the top
 	and the displayed subwiget in the main window
 	other widgets are hidden.
+	tabbedContainer will intercept tab keys on focus
+	and passthrough the rest to subwidget
+
+	Inherited methods:
+	getPanel( self )
+	getWindow( self )
 	"""
 
 	def __init__(self, window):#{{{
@@ -22,7 +29,6 @@ class tabbedContainer(widget):
 
 		self.tab = 0
 		self.tabNames = []
-		self.tabPanels = []
 		self.tabWidgets = [] #}}}
 
 	def hide(self):#{{{
@@ -35,8 +41,7 @@ class tabbedContainer(widget):
 		self.visible = False
 		self.panel.bottom()
 		self.panel.hide()
-		self.tabPanels[ self.tab ].bottom()
-		self.tabPanels[ self.tab ].hide()#}}}
+		self.tabWidget[ self.tab ].hide() #}}}
 
 	def show(self):#{{{
 		"""
@@ -48,8 +53,7 @@ class tabbedContainer(widget):
 		self.visible = True
 		self.panel.top()
 		self.panel.show()
-		self.tabPanels[ self.tab ].top()
-		self.tabPanels[ self.tab ].show()
+		self.tabWidget[ self.tab ].show()
 		self.display()#}}}
 
 	def display(self):#{{{
@@ -71,9 +75,7 @@ class tabbedContainer(widget):
 		"""
 		for widget in self.tabWidgets:
 			widget.clear()
-		self.window.move( 0, 0 )
-		self.window.clrtobot()
-		self.window.nooutrefresh()#}}}
+		super( tabbedContainer, self ).clear()#}}}
 
 	def resize(self, height, width, y0=self.y0, x0=self.x0):#{{{
 		"""
@@ -111,13 +113,8 @@ class tabbedContainer(widget):
 
 		h, w, y, x = self.getSubwinDimensions()
 		win = curses.newwin( h, w, y, x )
-		pan = panel.new_panel( win )
-		pan.bottom()
-		pan.hide()
 		wid = widget( win )
-
 		self.tabNames.append( title )
-		self.tabPanels.append( pan )
 		self.tabWidgets.append( wid )#}}}
 
 	def getWidget(self, title):#{{{
@@ -140,7 +137,6 @@ class tabbedContainer(widget):
 		"""
 		indx = self.tabNames.index( title )
 		self.tabNames.remove( indx )
-		self.tabPanels.remove( indx )
 		self.navigate(0)#}}}
 	
 	def navigate(self, n):#{{{
@@ -178,4 +174,5 @@ class tabbedContainer(widget):
 		if key == KEY_TABPREV:
 			self.navigate( -1 )
 			return
-		self.tabWidgets[ self.tab ].handleInput( key )#}}}
+		if self.tabWidgets:
+			self.tabWidgets[ self.tab ].handleInput( key )#}}}

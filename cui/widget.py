@@ -84,6 +84,10 @@ class widget( object ):
 		"""
 		This function handles the drawing
 		All widgets must override this function
+
+		A widget's display method can have unique arguments
+		Only call a widget's display method when you know
+		what type of widget you are displaying
 		"""
 		pass#}}}
 
