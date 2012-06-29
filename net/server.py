@@ -102,14 +102,23 @@ class Server(object): ##{{{
 		self.variables = dict(zip(keys, values))
 
 		self.clients= int(self.variables.get('clients', 1))
-		self.name = self.variables['sv_hostname']
-		self.name2 = re.sub( REs.STRIPCOLOR, '', self.name )
+		if 'sv_hostname' in self.variables:
+			self.name = self.variables['sv_hostname']
+			self.name2 = re.sub( REs.STRIPCOLOR, '', self.name )
+			self.gametype = self.variables.get("gametype", '')
+		elif 'tv_name' in self.variables:
+			self.name = self.variables['tv_name']
+			self.name2 = re.sub( REs.STRIPCOLOR, '', self.name )
+			self.gametype = 'tv'
+		else:
+			self.name = ''
+			self.name2 = ''
+			self.gametype = ''
 		self.game = self.variables.get('gamename', '')
-		self.gametype = self.variables["gametype"]
 		self.instagib = int(self.variables.get( 'g_instagib', 0 ))
-		self.map = self.variables["mapname"]
-		self.maxclients= int(self.variables["sv_maxclients"])
-		self.mod = self.variables["fs_game"]
+		self.map = self.variables.get("mapname", '')
+		self.maxclients= int(self.variables.get("sv_maxclients",0))
+		self.mod = self.variables.get("fs_game", '')
 		self.ping = 0
 		self.protocol = self.variables["protocol"]
 		self.version = self.variables["version"] ##}}}
@@ -152,7 +161,9 @@ class Server(object): ##{{{
 		self.parse_getstatus_variables(variables)
 
 		if len(players) > 0:
-			self.parse_getstatus_players(players) ##}}}
+			self.parse_getstatus_players(players)
+		else:
+			self.players = []##}}}
 
 	def getstatus(self): ##{{{
 		"""

@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+import curses
 
 ## Program Functions
 KEY_QUIT = [ ord(x) for x in 'qQ' ]
@@ -7,6 +8,7 @@ KEY_FILTER = [ curses.KEY_F2 ]
 KEY_STOP = [ curses.KEY_F3 ]
 KEY_REFRESH = [ curses.KEY_F4 ]
 KEY_LAUNCH = [ ord(x) for x in '\n\r' ]
+KEY_ACTION = [ ord(x) for x in 'y' ]
 KEY_TABNEXT = [ ord(x) for x in '\t' ]
 KEY_TABPREV = [ curses.KEY_BTAB ]
 KEY_ADDFAV = [ ord(x) for x in 'f' ]

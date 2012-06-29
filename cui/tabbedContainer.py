@@ -77,17 +77,15 @@ class tabbedContainer(widget):
 			widget.clear()
 		super( tabbedContainer, self ).clear()#}}}
 
-	def resize(self, height, width, y0=self.y0, x0=self.x0):#{{{
+	def resize(self, height, width, y0=None, x0=None):#{{{
 		"""
 		Resize and/or move the window
 
 		arguments:
 		height -- resized height
 		width -- resized width
-
-		keyword arguments:
-		y0 -- y coord of new top-left corner
-		x0 -- x coord of new top-left corner
+		y0 -- y coord of new top-left corner (default = unchanged)
+		x0 -- x coord of new top-left corner (default = unchanged)
 		"""
 		super( tabbedcontainer, self ).resize( self, height, width, y0, x0 )
 		h, w, y, x = self.getSubwinDimensions()

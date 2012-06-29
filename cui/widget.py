@@ -59,23 +59,21 @@ class widget( object ):
 		"""
 		return self.window#}}}
 
-	def resize(self, height, width, y0=self.y0, x0=self.x0):#{{{
+	def resize(self, height, width, y0=None, x0=None):#{{{
 		"""
 		Resize and/or move the window
 
 		arguments:
 		height -- resized height
 		width -- resized width
-
-		keyword arguments:
-		y0 -- y coord of new top-left corner
-		x0 -- x coord of new top-left corner
+		y0 -- y coord of new top-left corner (default = unchanged)
+		x0 -- x coord of new top-left corner (default = unchanged)
 		"""
 		self.clear()
 		self.height = height
 		self.width = width
 		self.window.resize( height, width )
-		if y0 != self.y0 and x0 != self.x0:
+		if y0 != None and x0 != None:
 			self.y0 = y0
 			self.x0 = x0
 			self.window.mvwin( y0, x0 ) #}}}

@@ -50,39 +50,37 @@ class statusContainer(widget):
 			self.widget.show()
 		self.visible = True
 		self.panel.top()
-		self.panel.show()
-		self.display()#}}}
+		self.panel.show() #}}}
 	
-	def resize(self, height, width, y0=self.y0, x0=self.x0):#{{{
+	def resize(self, height, width, y0=None, x0=None):#{{{
 		"""
 		Resize and/or move the window
 
 		arguments:
 		height -- resized height
 		width -- resized width
-
-		keyword arguments:
-		y0 -- y coord of new top-left corner
-		x0 -- x coord of new top-left corner
+		y0 -- y coord of new top-left corner (default = unchanged)
+		x0 -- x coord of new top-left corner (default = unchanged)
 		"""
 		if self.widget:
 			( h, w, y, x ) = self.getSubwinDimensions
 			self.widget.resize( h, w, y, x )
 		super( statusContainer, self ).resize( height, width, y0, x0 )#}}}
 
-	def display( self, x=0, message, width=self.width, mode=curses.A_NORMAL ):#{{{
+	def display( self, message, x=0, width=None, mode=curses.A_NORMAL ):#{{{
 		"""
 		Draw a status message at the given position with given properties
 		defaults to writing rest of line with normal mode
 
 		arguments:
-		x -- horizontal position of message (relative to widget window) (default = 0)
 		message -- string to be displayed
+		x -- horizontal position of message (relative to widget window) (default = 0)
 		width -- printing width allotted to message (default = self.width)
 		mode -- display mode (default = curses.A_NORMAL)
 		"""
-		if x + width > self.width:
-			width = self.width - x
+		if width == None: width = self.width-1
+		if x + width >= self.width:
+			width = self.width - x - 1
 		self.window.addstr( self.height-1, x, message[:width].ljust(width), mode )
 		self.window.nooutrefresh()#}}}
 
@@ -127,7 +125,9 @@ class statusContainer(widget):
 		if not self.subwindow:
 			( h, w, y, x ) = self.getSubwinDimensions()
 			self.subwindow = curses.newwin( h, w, y, x )
-		self.widget = widget( self.subwindow )#}}}
+		self.widget = widget( self.subwindow )
+		if self.visible:
+			self.widget.show()#}}}
 	
 	def getWidget(self):#{{{
 		"""
