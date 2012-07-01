@@ -40,6 +40,7 @@ class cursow(object):
 		self.srvlst.addColumn(0.2, lambda x: x.mod, 'mod')
 		self.srvlst.addColumn(0.2, lambda x: x.gametype, 'gametype')
 		self.srvlst.addColumn(0.4, lambda x: x.name, 'name')
+		self.srvlst.setSortKey( lambda x: x.name2 )
 
 		panel.update_panels()
 		curses.doupdate()

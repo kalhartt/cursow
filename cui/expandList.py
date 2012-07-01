@@ -380,7 +380,7 @@ class expandList(widget):
 		self.sort()#}}}
 
 	def sort( self ):#{{{
-		self.filteredItems = sorted( filter( self.filter, self.items ), self.sortkey )
+		self.filteredItems = sorted( filter( self.filter, self.items ), key=self.sortkey )
 		n = 0
 		while n < len( self.filteredItems ):
 			if isinstance(self.filteredItems[ n ], self.listItem) and self.filteredItems[n].expanded:
