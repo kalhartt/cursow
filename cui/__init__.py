@@ -4,7 +4,8 @@ __all__ = [
 	'columnList',
 	'common',
 	'expColumnList',
-	'options',
+	'menu',
+	'settings',
 	'panFilter',
 	'panFriends',
 	'panOptions',
@@ -17,7 +18,9 @@ __all__ = [
 
 import color
 from .common import *
-from .options import options
+from .menu import menu
+from .settings import settings
 from .columnList import columnList
 from .expandList import expandList
 from .statusContainer import statusContainer
+from .tabbedContainer import tabbedContainer

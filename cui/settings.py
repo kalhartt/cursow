@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 import os.path, ConfigParser
 
-class options(object):
+class settings(object):
 	""" Settings class
 
 	All of this just to avoid having a

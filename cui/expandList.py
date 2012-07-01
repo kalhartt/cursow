@@ -13,6 +13,7 @@ class expandList(widget):
 	Inherited methods:
 	hide(self)
 	show(self)
+	focus(self)
 	getPanel(self)
 	getWindow(self)
 	"""
@@ -93,6 +94,7 @@ class expandList(widget):
 		self.row = 0
 		self.firstrow = 0
 		self.maxrow = 0
+		self.paused = False
 
 		## Display variables
 		self.displayItems = {} # Dictionary is convenience to avoid some invalid-index checks
@@ -118,6 +120,9 @@ class expandList(widget):
 		Draw column headers and items
 		Attempts to refresh only what has been updated
 		"""
+		if self.paused:
+			return
+
 		if not self.columns or not self.filteredItems:
 			self.window.move(0, 0)
 			self.window.clrtobot()
@@ -209,12 +214,6 @@ class expandList(widget):
 		self.displayItems = {}
 		super( expandList , self ).clear()#}}}
 
-	def focus( self ):#{{{
-		"""
-		TODO
-		"""
-		pass#}}}
-
 	def handleInput( self, key ):#{{{
 		"""
 		Handles a given keypress
@@ -294,9 +293,8 @@ class expandList(widget):
 		self.items.append( listItem )
 		if self.filter( listItem ):
 			self.filteredItems.append( listItem )
-			self.filteredItems = sorted( self.filteredItems, key=self.sortkey )
 			self.maxrow += 1
-		self.display()#}}}
+			self.sort()#}}}
 
 	def getItem(self, index):#{{{
 		"""
@@ -385,7 +383,10 @@ class expandList(widget):
 		while n < len( self.filteredItems ):
 			if isinstance(self.filteredItems[ n ], self.listItem) and self.filteredItems[n].expanded:
 				expdata = self.filteredItems[n].expdata
-				self.filteredItems = self.filteredItems[:n+1] + expdata + self.filteredItems[n+1:]#}}}
+				self.filteredItems = self.filteredItems[:n+1] + expdata + self.filteredItems[n+1:]
+				n += len( expdata )
+			n += 1
+		self.display()#}}}
 
 	def addColumn( self, width, data, title ):#{{{
 		"""
@@ -403,7 +404,19 @@ class expandList(widget):
 		self.columns.append( col )
 		self.scaleColumns()#}}}
 	
-	def highlightColumn( self, title ): #{{{
+	def delColumn( self, title ):#{{{
+		"""
+		Delete Column with Given title
+	
+		arguments:
+		title -- title of column to delete
+		"""
+		for column in self.columns:
+			if column.title == title:
+				self.columns.remove( column )
+				return#}}}
+	
+	def highlightColumnTitle( self, title ): #{{{
 		"""
 		Highlight the column with given title
 		All other columns are de-highlighted
@@ -416,6 +429,36 @@ class expandList(widget):
 				column.setHighlight( True )
 			else:
 				column.setHighlight( False )##}}}
+
+	def highlightColumnIndex( self, index ): #{{{
+		"""
+		Highlight the column with given title
+		All other columns are de-highlighted
+
+		arguments:
+		index -- index of column to highlight
+		"""
+		for n in range( len( self.columns ) ):
+			column = self.columns[n]
+			if n == index:
+				column.setHighlight( True )
+			else:
+				column.setHighlight( False )##}}}
+
+	def pause( self ):#{{{
+		"""
+		Halt all printing to screen
+		"""
+		self.paused = True#}}}
+	
+	def unPause( self ):#{{{
+		"""
+		Resume printing to screen
+		and immediately repaint
+		"""
+		self.paused = False
+		self.displayItems = {}
+		self.display()#}}}
 
 	def scaleColumns(self):#{{{
 		"""

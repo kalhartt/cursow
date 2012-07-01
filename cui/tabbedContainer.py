@@ -41,7 +41,7 @@ class tabbedContainer(widget):
 		self.visible = False
 		self.panel.bottom()
 		self.panel.hide()
-		self.tabWidget[ self.tab ].hide() #}}}
+		self.tabWidgets[ self.tab ].hide() #}}}
 
 	def show(self):#{{{
 		"""
@@ -53,7 +53,7 @@ class tabbedContainer(widget):
 		self.visible = True
 		self.panel.top()
 		self.panel.show()
-		self.tabWidget[ self.tab ].show()
+		self.tabWidgets[ self.tab ].show()
 		self.display()#}}}
 
 	def display(self):#{{{
@@ -63,11 +63,11 @@ class tabbedContainer(widget):
 		self.window.move(1,0)
 		self.window.clrtoeol()
 		self.window.box()
-		width = (self.width - len(self.tabNames) - 3) / 3
+		width = (self.width - len(self.tabNames) - 3) / len( self.tabNames )
 		for n in xrange(len(self.tabNames)):
 			mode = curses.A_REVERSE if n == self.tab else curses.A_NORMAL
-			self.mainwin.addstr( 1, 2+n+n*width, self.tabNames[n][:width].center(width), mode)
-		self.mainwin.nooutrefresh()#}}}
+			self.window.addstr( 1, 2+n+n*width, self.tabNames[n][:width].center(width), mode)
+		self.window.nooutrefresh()#}}}
 
 	def clear(self):##{{{
 		"""
@@ -87,10 +87,10 @@ class tabbedContainer(widget):
 		y0 -- y coord of new top-left corner (default = unchanged)
 		x0 -- x coord of new top-left corner (default = unchanged)
 		"""
-		super( tabbedcontainer, self ).resize( self, height, width, y0, x0 )
+		super( tabbedContainer, self ).resize( height, width, y0, x0 )
 		h, w, y, x = self.getSubwinDimensions()
 		for widget in self.tabWidgets:
-			widget.resize( self, h, w, y, x ) #}}}
+			widget.resize( h, w, y, x ) #}}}
 
 	def getSubwinDimensions(self):#{{{
 		"""
@@ -105,6 +105,8 @@ class tabbedContainer(widget):
 		arguments:
 		title -- distinct name of the widget to be displayed
 		widget -- widget (not an instance thereof) to be added
+		returns:
+		widget -- reference to created widget
 		"""
 		if title in self.tabNames:
 			raise cuiException( 'addWidget %s failed: Name already exists' % title )
@@ -113,7 +115,8 @@ class tabbedContainer(widget):
 		win = curses.newwin( h, w, y, x )
 		wid = widget( win )
 		self.tabNames.append( title )
-		self.tabWidgets.append( wid )#}}}
+		self.tabWidgets.append( wid )
+		return wid#}}}
 
 	def getWidget(self, title):#{{{
 		"""
@@ -144,6 +147,9 @@ class tabbedContainer(widget):
 		argument:
 		n -- number of tabs to move right
 		"""
+		if n == 0:
+			return
+		self.tabWidget[ self.tab ].hide()
 		self.tab = (self.tab+n)%len(self.tabNames)#}}}
 
 	def focus(self):#{{{
@@ -153,10 +159,11 @@ class tabbedContainer(widget):
 		while True:
 			key = self.window.getch()
 
-			if key == KEY_QUIT:
+			if key in KEY_QUIT:
 				return
 			else:
-				handleInput( key )#}}}
+				self.handleInput( key )
+			curses.doupdate()#}}}
 
 	def handleInput(self, key):#{{{
 		"""

@@ -24,7 +24,7 @@ class cursow(object):
 		self.serverips = set()
 		self.mods = set()
 		self.gametypes = set()
-		self.settings = cui.options()
+		self.settings = cui.settings()
 
 		self.stdscr = screen
 		## Status Container
@@ -34,21 +34,12 @@ class cursow(object):
 		## Server list as statusContainer widget
 		self.status.addWidget( cui.expandList )
 		self.srvlst = self.status.getWidget()
-		self.srvlst.addColumn( 3, lambda x: '%03d' % x.ping, 'png' )
-		self.srvlst.addColumn( 5, lambda x: '%s/%s' % (x.clients, x.maxclients), 'plyrs')
-		self.srvlst.addColumn(0.2, lambda x: x.map, 'map')
-		self.srvlst.addColumn(0.2, lambda x: x.mod, 'mod')
-		self.srvlst.addColumn(0.2, lambda x: x.gametype, 'gametype')
-		self.srvlst.addColumn(0.4, lambda x: x.name, 'name')
-		self.srvlst.setSortKey( lambda x: x.name2 )
+		self.initColumns()
+		self.initMenus()
 
 		panel.update_panels()
 		curses.doupdate()
 
-		##self.tabwin = curses.newwin( curses.LINES-4, curses.COLS-8, 2,4)
-		##self.tabcon = cui.panTabbedContainer( self.tabwin, self.settings )
-		##self.tabcon.addWidget( 'Filter1', cui.panFilter )
-		##self.tabcon.addWidget( 'Filter2', cui.panFilter )
 
 		## Import servers
 		self.mainThread = threading.Thread(target=self.queryMasters)
@@ -62,11 +53,99 @@ class cursow(object):
 				self.quit()
 				break
 
+			elif key in cui.KEY_LEFT:
+				self.navColumn( -1 )
+
+			elif key in cui.KEY_RIGHT:
+				self.navColumn( 1 )
+
+			elif key in cui.KEY_FILTER:
+				self.srvlst.pause()
+				self.tabcon.show()
+				panel.update_panels()
+				curses.doupdate()
+				self.menu.display()
+				curses.doupdate()
+
+				self.tabcon.focus()
+
+				self.tabcon.hide()
+				panel.update_panels()
+				curses.doupdate()
+				self.srvlst.unPause()
+
+			elif key in cui.KEY_RESIZE:
+				self.resize()
+
 			else:
 				self.srvlst.handleInput( key )
 				self.status.display( 'row: %d firstrow: %d height: %d items: %d' % (self.srvlst.row, self.srvlst.firstrow, self.srvlst.height, len(self.srvlst.items)) )
 
 			curses.doupdate()#}}}
+	
+	##########
+	# Screen object helpers
+	##########
+	def initColumns( self ):
+		self.column = 4
+		self.columnNames = [ 'i', 'p', 'png', 'plyrs', 'map', 'mod', 'gametype', 'name' ]
+		self.columnDisps = [
+				lambda x: 'X' if x.instagib else ' ', 
+				lambda x: 'X' if x.password else ' ',
+				lambda x: '%d' % x.ping,
+				lambda x: '%s/%s' % (x.clients, x.maxclients),
+				lambda x: x.map,
+				lambda x: x.mod,
+				lambda x: x.gametype,
+				lambda x: x.name ]
+		self.columnSorts = [
+				lambda x: 1 if x.instagib else 0, 
+				lambda x: 1 if x.password else 0,
+				lambda x: x.ping,
+				lambda x: x.clients,
+				lambda x: x.map.lower(),
+				lambda x: x.mod.lower(),
+				lambda x: x.gametype.lower(),
+				lambda x: x.name2.lower() ]
+		self.columnWidths = [ 1, 1, 3, 5, -1, -1, -1, -2 ]
+		totalwidth = 5
+		
+		for n in range( len(self.columnNames) ):
+			w = self.columnWidths[n]
+			if w < 0: w = -w / float( totalwidth )
+			self.srvlst.addColumn( w, self.columnDisps[n], self.columnNames[n] )
+		self.srvlst.highlightColumnIndex( self.column )
+		self.srvlst.setSortKey( self.columnSorts[ self.column ] )
+
+	def initMenus( self ):
+		"""
+		Helper to make menus
+		"""
+		## Make tabbed container
+		self.tabwin = curses.newwin( curses.LINES-4, curses.COLS-8, 2,4)
+		self.tabcon = cui.tabbedContainer( self.tabwin )
+		self.menu = self.tabcon.addWidget( 'Menu1', cui.menu )
+		self.menu.addLabel( "Hello There" )
+		self.test = False
+		self.menu.addToggleOption( "test", self.getTest, self.setTest  )
+
+		pass
+
+	def resize( self ):
+		"""
+		Resize main containers, the containers
+		will resize their children
+		"""
+		height, width = self.stdscr.getmaxyx()
+		self.status.resize( height, width )
+		self.tabcon.resize( height-4, width-8, 2,4)
+		self.status.display( 'ROWS: %d COLS: %d height: %d width: %d' % (curses.LINES, curses.COLS, height, width) )
+
+	def getTest(self):
+		return self.test
+
+	def setTest(self, x ):
+		self.test = x
 	
 	def queryMasters(self):#{{{
 		if self.settings.showFavorites():
@@ -155,8 +234,10 @@ class cursow(object):
 		## }}}
 	
 	def navColumn(self, n): ## {{{
-		self.srvlst.sort( n=n )
-		self.status.display( 'row: %d\tfirstrow: %d\theight: %d\titems: %d' % (self.srvlst.row, self.srvlst.firstrow, self.srvlst.height, len(self.srvlst.items)) )
+		self.column = (self.column+n)%len(self.columnSorts)
+		self.srvlst.highlightColumnIndex( self.column )
+		self.srvlst.setSortKey( self.columnSorts[ self.column ] )
+		self.status.display( 'row: %d firstrow: %d height: %d items: %d' % (self.srvlst.row, self.srvlst.firstrow, self.srvlst.height, len(self.srvlst.items)) )
 		## }}}
 
 	def refresh(self): ##{{{

@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 import curses
 from curses import panel
+from .common import *
 
 class widget( object ):
 	"""
@@ -45,7 +46,7 @@ class widget( object ):
 		if self.visible:
 			return
 		self.panel.top()
-		self.panel.show()#}}}
+		self.panel.show() #}}}
 
 	def getPanel(self):#{{{
 		"""
@@ -73,10 +74,10 @@ class widget( object ):
 		self.height = height
 		self.width = width
 		self.window.resize( height, width )
-		if y0 != None and x0 != None:
-			self.y0 = y0
-			self.x0 = x0
-			self.window.mvwin( y0, x0 ) #}}}
+		## if y0 != None and x0 != None:
+		## 	self.y0 = y0
+		## 	self.x0 = x0
+		## 	self.window.mvwin( y0, x0 ) #}}}
 
 	def display(self):#{{{
 		"""
@@ -103,7 +104,14 @@ class widget( object ):
 		This should implement a main loop with getch()
 		and return when done.
 		"""
-		pass#}}}
+		while True:
+			key == self.window.getch()
+
+			if key in KEY_QUIT:
+				return
+
+			else:
+				self.handleInput( self, key ) #}}}
 
 	def handleInput(self, key):#{{{
 		"""

@@ -2,6 +2,7 @@
 import curses
 from curses import panel
 from .widget import widget
+import sys
 
 class statusContainer(widget):
 	"""
@@ -62,10 +63,13 @@ class statusContainer(widget):
 		y0 -- y coord of new top-left corner (default = unchanged)
 		x0 -- x coord of new top-left corner (default = unchanged)
 		"""
+		sys.stderr.write('Resize Event\n')
+		sys.stderr.write('height: %d, width: %d\n' % (self.height, self.width) )
+		super( statusContainer, self ).resize( height, width, y0, x0 )
+		sys.stderr.write('height: %d, width: %d\n' % (self.height, self.width) )
 		if self.widget:
-			( h, w, y, x ) = self.getSubwinDimensions
-			self.widget.resize( h, w, y, x )
-		super( statusContainer, self ).resize( height, width, y0, x0 )#}}}
+			( h, w, y, x ) = self.getSubwinDimensions()
+			self.widget.resize( h, w, y, x )#}}}
 
 	def display( self, message, x=0, width=None, mode=curses.A_NORMAL ):#{{{
 		"""

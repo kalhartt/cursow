@@ -119,6 +119,7 @@ class Server(object): ##{{{
 		self.map = self.variables.get("mapname", '')
 		self.maxclients= int(self.variables.get("sv_maxclients",0))
 		self.mod = self.variables.get("fs_game", '')
+		self.password = int(self.variables.get( 'g_needpass', 0 ))
 		self.ping = 0
 		self.protocol = self.variables["protocol"]
 		self.version = self.variables["version"] ##}}}
