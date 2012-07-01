@@ -145,23 +145,61 @@ class expandList(widget):
 
 			mode = curses.A_REVERSE * ( index == self.row )
 			if y > 0:
-				self.window.addstr( y, 1, ''.ljust(self.width-2), mode )
+				self.printColor( y, 1, '', mode=mode)
 			x = 1
 			if isinstance( listItem, self.listItem ):
 				if y > 0:
 					for column in self.columns:
 						w = column.width if column.width >= 1 else int( column.width * ( self.width - self.spacers ) )
-						self.window.addstr( y, x, column.data(listItem.item)[:w].ljust( w ), mode )
+						self.printColor( y, x,  column.data(listItem.item), w, mode )
 						x += w+1
 			elif y > 0:
 				w = self.width - 4
-				self.window.addstr( y, 3, listItem[:w].ljust( w ), mode )
+				self.printColor( y, 3, listItem, w, mode )
 
 		if self.maxrow-self.firstrow+1 < self.height:
 			self.window.move( self.maxrow-self.firstrow+1, 0 )
 			self.window.clrtobot()
 
 		self.window.nooutrefresh()#}}}
+
+	def printColor(self, y, x, message, width=None, mode=None):#{{{
+		"""
+		Parse quakestyle color codes and print as told
+
+		arguments:
+		y -- location to print
+		x -- location to print
+		message -- string to parse and print
+		width -- allotted space to print (default = till screen end-1)
+		mode -- mode to print (default = curses.A_NORMAL)
+		"""
+		#TODO - handle non-color terminals
+		if width == None:
+			width = self.width - x - 2
+		if mode == None:
+			mode = 0
+		
+		n = 0
+		color = curses.color_pair(1)
+		while width > 0:
+			c = message[n] if n < len( message ) else ' '
+			if c == '^' and n+1 < len( message ):
+				c2 = message[n+1]
+				try:
+					color = curses.color_pair( int(c2) + 2 )
+					n += 2
+				except ValueError:
+					self.window.addstr( y, x, c, mode|color )
+					n += 1
+					width -= 1
+					x += 1
+			else:
+				self.window.addstr( y, x, c, mode|color )
+				n += 1
+				width -= 1
+				x += 1
+			#}}}
 
 	def clear(self):#{{{
 		"""
@@ -171,11 +209,11 @@ class expandList(widget):
 		self.displayItems = {}
 		super( expandList , self ).clear()#}}}
 
-	def focus( self ):
+	def focus( self ):#{{{
 		"""
 		TODO
 		"""
-		pass
+		pass#}}}
 
 	def handleInput( self, key ):#{{{
 		"""
