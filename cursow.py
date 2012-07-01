@@ -62,7 +62,7 @@ class cursow(object):
 				break
 
 			else:
-				self.srvlst.move( 1 )
+				self.srvlst.handleInput( key )
 				self.status.display( 'row: %d firstrow: %d height: %d items: %d' % (self.srvlst.row, self.srvlst.firstrow, self.srvlst.height, len(self.srvlst.items)) )
 
 			curses.doupdate()#}}}
@@ -133,7 +133,7 @@ class cursow(object):
 		## 	runlist = [ 'warsow', '-d', os.path.dirname(path), path, args, 'connect', '%s:%d' % (server.host, server.port) ]
 		## else:
 		## 	prog = path
-		## 	runlist = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
+		## 	runlimt = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
 
 		## if os.fork():
 		## 	self.stop = True

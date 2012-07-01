@@ -8,7 +8,9 @@ class expandList(widget):
 	"""
 	Displays a list of data with columns
 	List can be sorted and filtered arbitrarily
-	Items can be expanded to show a list of strings
+	Items in list can be expanded to show subdata
+
+	Display function supports quake color formatting
 
 	Inherited methods:
 	hide(self)
@@ -19,7 +21,7 @@ class expandList(widget):
 
 	class column(object):#{{{
 		"""
-		Column object for expandList
+		Column object for columnList
 
 		The columnList class should provide the interface for
 		this class. An external class should never have to 
@@ -92,9 +94,9 @@ class expandList(widget):
 		## Position variables
 		self.row = 0
 		self.firstrow = 0
-		self.maxrow = 0
 
 		## Display variables
+		self.listLength = 0
 		self.displayItems = {} # Dictionary is convenience to avoid some invalid-index checks
 		self.spacers = 2
 
@@ -132,9 +134,13 @@ class expandList(widget):
 			self.window.addstr( 0, x, column.title[:w].ljust( w ), mode )
 			x += w+1
 
-		for index in range( len(self.filteredItems) ):
-			y = 1 - self.firstrow + index
-			if y >= self.height: break
+		index = self.firstrow
+		y = 1
+		while y < self.height:
+			if index >= len( self.filteredItems ):
+				self.window.move( y , 0 )
+				self.window.clrtobot()
+				break
 
 			listItem = self.filteredItems[ index ]
 
@@ -143,25 +149,26 @@ class expandList(widget):
 			else:
 				self.displayItems[ y ] = listItem
 
-			mode = curses.A_REVERSE * ( index == self.row )
-			if y > 0:
-				self.window.addstr( y, 1, ''.ljust(self.width-2), mode )
+			mode = curses.A_REVERSE * ( y == self.row+1 )
+			self.window.addstr( y, 1, ''.ljust(self.width-2), mode )
 			x = 1
-			if isinstance( listItem, self.listItem ):
-				if y > 0:
-					for column in self.columns:
-						w = column.width if column.width >= 1 else int( column.width * ( self.width - self.spacers ) )
-						self.window.addstr( y, x, column.data(listItem.item)[:w].ljust( w ), mode )
-						x += w+1
-			elif y > 0:
-				w = self.width - 4
-				self.window.addstr( y, 3, listItem[:w].ljust( w ), mode )
+			for column in self.columns:
+				w = column.width if column.width >= 1 else int( column.width * ( self.width - self.spacers ) )
+				self.window.addstr( y, x, column.data(listItem.item)[:w].ljust( w ), mode )
+				x += w+1
 
-		if self.maxrow-self.firstrow+1 < self.height:
-			self.window.move( self.maxrow-self.firstrow+1, 0 )
-			self.window.clrtobot()
+			#if listItem.expanded:
+			#	w = self.width - 4
+			#	for expdata in listItem.expdata:
+			#		y += 1
+			#		if y >= self.height: break
+			#		mode = curses.A_REVERSE * ( y == self.row+1 )
+			#		self.window.addstr( y, 3, expdata[:w].ljust( w ), mode )
 
-		self.window.nooutrefresh()#}}}
+			y += 1
+			index += 1
+
+		self.window.nooutrefresh() #}}}
 
 	def clear(self):#{{{
 		"""
@@ -199,7 +206,8 @@ class expandList(widget):
 		elif key in KEY_PGDOWN:
 			self.move( self.height - 1 )
 		elif key in KEY_ACTION:
-			self.expandItem()#}}}
+			self.expandSelectedItem()
+		self.window.nooutrefresh()#}}}
 
 	def move( self, n ):#{{{
 		"""
@@ -218,7 +226,7 @@ class expandList(widget):
 		self.displayItems[ 1 + self.row - self.firstrow ] = False
 
 		## Do we even have items? Or is it top of list?
-		if self.maxrow == 0 or self.row < 0:
+		if not self.filteredItems or self.row < 0:
 			if self.firstrow != 0:
 				self.displayItems = {}
 				self.firstrow = 0
@@ -227,8 +235,8 @@ class expandList(widget):
 			self.row = 0
 
 		## End of list?
-		if self.row >= self.maxrow:
-			self.row = self.maxrow-1
+		if self.row >= self.listLength:
+			self.row = self.listLength - 1
 			self.displayItems[ 1 + self.row ] = False
 
 		## Scroll down?
@@ -242,22 +250,33 @@ class expandList(widget):
 			self.displayItems = {}
 
 		self.display()#}}}
-		
-	def addItem(self, item, expdata=[]):#{{{
+	
+	def sort( self ):#{{{
+		"""
+		Resort/filter the data and update listlength
+		"""
+		self.filteredItems = sorted( filter( lambda x: self.filter( x.item ), self.items ), key=lambda x: self.sortkey( x.item ) )
+		self.listLength = len( self.filteredItems )
+		for item in self.filteredItems:
+			if item.expanded:
+				self.listLength += len( item.expdata )#}}}
+
+	def addItem(self, item, expdata):#{{{
 		"""
 		Add an item, and resort/display it
 		if it matches current filter
 
 		argument:
 		item -- item to add
-		expdata -- string of lists to show when item is expanded (default = [])
 		"""
-		listItem = self.listItem( item, expdata )
-		self.items.append( listItem )
-		if self.filter( listItem ):
-			self.filteredItems.append( listItem )
-			self.filteredItems = sorted( self.filteredItems, key=self.sortkey )
-			self.maxrow += 1
+		newitem = self.listItem( item , expdata ) 
+		self.items.append( newitem )
+		self.filteredItems.append( newitem )
+		self.listLength += 1
+		#if self.filter( item ):
+		#	self.filteredItems.append( newitem )
+		#	self.filteredItems = sorted( self.filteredItems, key=lambda x: self.sortkey( x.item ) )
+		#	self.listLength += 1
 		self.display()#}}}
 
 	def getItem(self, index):#{{{
@@ -270,24 +289,6 @@ class expandList(widget):
 		"""
 		return self.items[ index ].item#}}}
 
-	def expandItem( self ):#{{{
-		"""
-		toggle expansion of currently selected item
-		"""
-		index = self.getSelectedIndex()
-		listItem = self.filteredItems[ index ]
-		if listItem.expanded:
-			listItem.expanded = False
-			self.filteredItems = self.filteredItems[:index+1] + self.filteredItems[index+1+len(listItem.expdata):]
-			self.maxrow -= len( listItem.expdata )
-			self.row = index
-			self.displayItems[ 1 + self.row - self.firstrow ] = False
-		else:
-			listItem.expanded = True
-			self.filteredItems = self.filteredItems[:index+1] + listItem.expdata + self.filteredItems[index+1:]
-			self.maxrow += len( listItem.expdata )
-		self.display() #}}}
-
 	def getItems(self):#{{{
 		"""
 		Return item list
@@ -298,56 +299,57 @@ class expandList(widget):
 		"""
 		Return filtered item list
 		"""
-		result = []
-		for listItem in self.filteredItems:
-			if isinstance( listItem, self.listItem ):
-				result.append( listItem.item )
-		return result#}}}
-
-	def getSelectedIndex( self ):#{{{
-		"""
-		Get index of currently selected item
-		"""
-		index = self.row
-		while not isinstance( self.filteredItems[index] , self.listItem ) and index > -1:
-			index -= 1
-		return index#}}}
+		return [ x.item for x in self.filteredItems ]#}}}
 
 	def getSelectedItem(self):#{{{
 		"""
 		Return currently highlighted item
 		"""
-		return self.filteredItems[ self.getSelectedIndex() ].item#}}}
+		return self.items[ self.row ].item#}}}
+
+	def selectedIndex( self ):#{{{
+		"""
+		Return index of currently highlighted object
+		"""
+		indx = 0
+		row = 0
+		while row <= self.row:
+			listItem = self.filteredItems[ indx ]
+			if listItem.expanded: row += len( listItem.expdata )
+			indx += 1
+			row += 1
+		return indx#}}}
+
+	def expandSelectedItem( self ):#{{{
+		"""
+		Expand currently highlighted item
+		"""
+		item = self.filteredItems[ self.selectedIndex() ]
+		if item.expanded:
+			self.listLength += len( item.expdata )
+		else:
+			self.listLength -= len( item.expdata )
+		item.toggleExpand()#}}}
 
 	def setFilter( self, filt ):#{{{
 		"""
 		set the lists filtering function
-		use lambda x: True to show all items
 
 		arguments:
 		filt -- new filter function for list
 		"""
-		self.filter = lambda x: filt( x.item )
-		self.sort()#}}}
+		self.filter = filt
+		self.sort() #}}}
 	
 	def setSortKey( self, sortkey ):#{{{
 		"""
 		set the lists sorting function
-		use lambda x: True keep in order added
 
 		arguments
-		sortkey -- new sort function for list
+		sort -- new sort function for list
 		"""
-		self.sortkey = lambda x: sortkey( x.item )
-		self.sort()#}}}
-
-	def sort( self ):#{{{
-		self.filteredItems = sorted( filter( self.filter, self.items ), self.sortkey )
-		n = 0
-		while n < len( self.filteredItems ):
-			if isinstance(self.filteredItems[ n ], self.listItem) and self.filteredItems[n].expanded:
-				expdata = self.filteredItems[n].expdata
-				self.filteredItems = self.filteredItems[:n+1] + expdata + self.filteredItems[n+1:]#}}}
+		self.sortkey = sortkey
+		self.sort() #}}}
 
 	def addColumn( self, width, data, title ):#{{{
 		"""
