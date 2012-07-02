@@ -132,10 +132,10 @@ class settings(object):
 		host -- ip:port of server to add
 		"""
 		section = 'Favorites ' + self.cp.get( 'General', 'Game' )
-		numfav = len( self.cp.options( section ) )
-		while self.cp.has_option( section , 'server%03d' % nextfav ):
-			nextfav += 1
-		self.cp.set( section , 'server%03d' % nextfav , host )#}}}
+		lastfav = len( self.cp.options( section ) )
+		while self.cp.has_option( section , 'server%03d' % lastfav ):
+			lastfav += 1
+		self.cp.set( section , 'server%03d' % lastfav , host )#}}}
 
 	def delFav(self, host):#{{{
 		"""

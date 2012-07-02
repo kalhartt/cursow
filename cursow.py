@@ -350,8 +350,6 @@ class cursow(object):
 	def launch(self): ## {{{
 		server = self.srvlst.getSelectedItem()
 		path, args = self.settings.getPath(), self.settings.getArgs()
-		sys.stderr.write('PATH: %s\n' % path)
-		sys.stderr.write('ARGS: %s\n' % args)
 
 		if sys.platform == 'cygwin':
 			prog = '/usr/bin/cygstart'
