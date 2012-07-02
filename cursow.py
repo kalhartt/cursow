@@ -3,8 +3,6 @@ import curses, threading, time, os, sys
 from curses import panel
 
 import cui
-#from cui.common import *
-#from cui import color, options, columnList, tabbedContainer
 from net import *
 from net import ConnectionError
 
@@ -227,8 +225,29 @@ class cursow(object):
 		self.friendMenu.addLabel( 'Keyboard Shortcuts', just='center' )
 
 		## Make Help menu
+		# TODO - make this read from cui/common
 		self.helpMenu = self.tabcon.addWidget( 'Help', cui.menu )
 		self.helpMenu.addLabel( 'Keyboard Shortcuts', just='center' )
+		self.helpMenu.addLabel( 'General', mode=curses.A_REVERSE )
+		self.helpMenu.addLabel( 'Quit: q,Q' )
+		self.helpMenu.addLabel( 'Help: F1' )
+		self.helpMenu.addLabel( 'Menu: F2' )
+		self.helpMenu.addLabel( 'Stop: F3' )
+		self.helpMenu.addLabel( 'Refresh: F4' )
+		self.helpMenu.addLabel( 'Expand Server: <Space>' )
+		self.helpMenu.addLabel( 'Launch Server: <Enter>' )
+		self.helpMenu.addLabel( 'Add to Favorites: f' )
+		self.helpMenu.addLabel( 'Remove from Favorites: F' )
+		self.helpMenu.addLabel( 'Reverse Sort: r,R' )
+		self.helpMenu.addLabel( 'Navigation', mode=curses.A_REVERSE )
+		self.helpMenu.addLabel( 'Up: w,u,<UP>' )
+		self.helpMenu.addLabel( 'Up 5: W,U'  )
+		self.helpMenu.addLabel( 'Page Up: <PG-UP>'  )
+		self.helpMenu.addLabel( 'Down: s,e,<DOWN>' )
+		self.helpMenu.addLabel( 'Down 5: S,E'  )
+		self.helpMenu.addLabel( 'Page Down: <PG-DN>'  )
+		self.helpMenu.addLabel( 'Next Tab: <TAB>' )
+		self.helpMenu.addLabel( 'Prev Tab: <S-TAB>' )
 
 		#}}}
 
@@ -303,10 +322,10 @@ class cursow(object):
 			elif key in cui.KEY_DELFAV:
 				self.delFav()
 
-			elif key in cui.KEY_LEFT:
+			elif key in cui.KEY_LEFT or key in cui.KEY_TABPREV:
 				self.navColumn( -1 )
 
-			elif key in cui.KEY_RIGHT:
+			elif key in cui.KEY_RIGHT or key in cui.KEY_TABNEXT:
 				self.navColumn( 1 )
 
 			elif key in cui.KEY_REVERSE:
@@ -315,10 +334,20 @@ class cursow(object):
 			elif key in cui.KEY_MENU:
 				self.showMenu()
 
+			elif key in cui.KEY_HELP:
+				self.tabcon.navigateTitle( 'Help' )
+				self.showMenu()
+
+			elif key in cui.KEY_STOP:
+				self.stopServers()
+
+			elif key in cui.KEY_REFRESH:
+				self.startQuery()
+
 			else:
 				self.srvlst.handleInput( key )
 		else:
-			if key in cui.KEY_MENU:
+			if key in cui.KEY_MENU or key in cui.KEY_HELP:
 				self.hideMenu()
 
 			else:

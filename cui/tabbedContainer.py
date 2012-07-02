@@ -3,7 +3,6 @@ import curses
 from curses import panel
 from .widget import widget
 from .common import *
-import sys
 
 class tabbedContainer(widget):
 	"""
@@ -152,7 +151,28 @@ class tabbedContainer(widget):
 			return
 		self.tabWidgets[ self.tab ].hide()
 		self.tab = (self.tab+n)%len(self.tabNames)
-		self.tabWidgets[ self.tab ].show()#}}}
+		if self.visible:
+			self.tabWidgets[ self.tab ].show()
+			panel.update_panels()
+			self.display()
+			self.tabWidgets[ self.tab ].display()#}}}
+
+	def navigateTitle( self, title ):#{{{
+		"""
+		Switches to tab with given title
+
+		argument:
+		title -- title of tab wanted
+		"""
+		while self.tabNames[ self.tab ] != title:
+			self.tabWidgets[ self.tab ].hide()
+			self.tab = (self.tab+1)%len(self.tabNames)
+		if self.visible:
+			self.tabWidgets[ self.tab ].show()
+			panel.update_panels()
+			self.display()
+			self.tabWidgets[ self.tab ].display()#}}}
+		
 
 	def focus(self):#{{{
 		"""
@@ -175,13 +195,10 @@ class tabbedContainer(widget):
 		arguments:
 		key -- ord(key) of the pressed key
 		"""
-		sys.stderr.write( 'Handling key input' )
 		if key in KEY_TABNEXT:
-			sys.stderr.write( 'Handling Tabnext' )
 			self.navigate( 1 )
 			return
 		if key in KEY_TABPREV:
-			sys.stderr.write( 'Handling prev' )
 			self.navigate( -1 )
 			return
 		if self.tabWidgets:
