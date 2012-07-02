@@ -125,13 +125,17 @@ class statusContainer(widget):
 
 		arguments:
 		widget -- widget class (not an instance thereof) to be added
+
+		returns:
+		created subwidget
 		"""
 		if not self.subwindow:
 			( h, w, y, x ) = self.getSubwinDimensions()
 			self.subwindow = curses.newwin( h, w, y, x )
 		self.widget = widget( self.subwindow )
 		if self.visible:
-			self.widget.show()#}}}
+			self.widget.show()
+		return self.widget#}}}
 	
 	def getWidget(self):#{{{
 		"""

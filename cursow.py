@@ -6,40 +6,28 @@ import cui
 #from cui.common import *
 #from cui import color, options, columnList, tabbedContainer
 from net import *
-from net import Error, ConnectionError
+from net import ConnectionError
 
 class cursow(object):
 
 	def __init__(self,screen):#{{{
 		## curses options
 		curses.curs_set(0)
-		screen.keypad(1)
-		#screen.nodelay(1)
-
-		## Set colors
 		cui.color.setColor()
+		self.stdscr = screen
+		self.stdscr.keypad(1)
 		
 		## Needed variables
 		self.stop = False
 		self.serverips = set()
-		self.mods = set()
-		self.gametypes = set()
 		self.settings = cui.settings()
 
-		self.stdscr = screen
-		## Status Container
-		win = curses.newwin( 0, 0 )
-		self.status = cui.statusContainer( win )
-		self.status.show()
-		## Server list as statusContainer widget
-		self.status.addWidget( cui.expandList )
-		self.srvlst = self.status.getWidget()
-		self.initColumns()
+		self.initSrvlst()
 		self.initMenus()
+		self.focusedWidget = self.srvlst
 
 		panel.update_panels()
 		curses.doupdate()
-
 
 		## Import servers
 		self.mainThread = threading.Thread(target=self.queryMasters)
@@ -53,40 +41,114 @@ class cursow(object):
 				self.quit()
 				break
 
-			elif key in cui.KEY_LEFT:
-				self.navColumn( -1 )
-
-			elif key in cui.KEY_RIGHT:
-				self.navColumn( 1 )
-
-			elif key in cui.KEY_FILTER:
-				self.srvlst.pause()
-				self.tabcon.show()
-				panel.update_panels()
-				curses.doupdate()
-				self.menu.display()
-				curses.doupdate()
-
-				self.tabcon.focus()
-
-				self.tabcon.hide()
-				panel.update_panels()
-				curses.doupdate()
-				self.setFilters()
-				self.srvlst.unPause()
-
-			elif key in cui.KEY_RESIZE:
-				self.resize()
-
 			else:
-				self.srvlst.handleInput( key )
-				self.status.display( 'row: %d firstrow: %d height: %d items: %d' % (self.srvlst.row, self.srvlst.firstrow, self.srvlst.height, len(self.srvlst.items)) )
+				self.handleInput( key )
 
 			curses.doupdate()#}}}
 	
 	##########
+	# Server Control
+	##########
+
+	def startQuery(self): ##{{{
+		pass
+		## self.stopServers()
+		## ## Wait for stopServers
+		## while threading.activeCount() > 1:
+		## 	time.sleep(0.2)
+		## ## Clear variables and display
+		## self.stop = False
+		## self.serverips = set()
+		## self.mods = set()
+		## self.gametypes = set()
+		## self.srvlst.clear()
+		## ## Restart Server Thread
+		## self.mainThread = threading.Thread(target=self.queryMasters)
+		## self.mainThread.start()
+		## }}}
+	
+	def queryMasters(self):#{{{
+		if self.settings.getShowFavorites():
+			for host in self.settings.getFav():
+				self.status.display( 'Adding Favorite: %s' % (host) )
+				if self.stop:
+					return
+				self.serverips.add( host )
+				curses.doupdate()
+		else:
+			for host, port, protocol, opts  in self.settings.getMasters():
+				if self.stop:
+					return
+				try:
+					self.status.display( 'Querying Master Server: %s %d %d %s' % (host, port, protocol, opts) )
+					curses.doupdate()
+					self.serverips |= server.MasterServer( host, port=port, protocol=protocol, options=opts )
+				except:
+					continue
+		self.processedServers = 0
+		self.totalServers = len( self.serverips )
+		self.mainThread = threading.Thread(target=self.processServers)
+		self.mainThread.start()#}}}
+	
+	def processServer(self, ip):#{{{
+		try:
+			host = ip.split(':')
+			srv = server.Server( host[0], int(host[1]) )
+			srv.getstatus()
+			self.settings.addGametype( srv.gametype )
+			self.settings.addMod( srv.mod )
+			if self.settings.getPing(): srv.getPing()
+			expdata =  [ p.name for p in srv.players  ]
+			self.srvlst.addItem( srv, expdata )
+			curses.doupdate()
+			self.processedServers += 1
+			self.printProcessStatus()
+		except ConnectionError:
+			self.processedServers += 1
+			self.printProcessStatus()
+		return#}}}
+
+	def processServers(self):#{{{
+		for ip in self.serverips:
+			if self.stop:
+				break
+			if threading.activeCount() > 5:
+				time.sleep(0.1)
+			thread = threading.Thread(target=self.processServer, args=[ip])
+			thread.start()#}}}
+
+	def stopServers(self): ## {{{
+		self.stop = True
+		#self.status.disp( 'Stopping active threads...' )
+		curses.doupdate()
+		## }}}
+
+	def printProcessStatus( self ):#{{{
+		"""
+		Helper method to update status with progress bar
+		"""
+		if self.totalServers == 0:
+			return
+		w = self.status.width - 1
+		msg = '%d/%d' % ( self.processedServers, self.totalServers )
+		w2 = int( float( w-len(msg)-3 ) * self.processedServers / self.totalServers )
+		msg = msg + ' %' + ('='*w2).ljust( w-len(msg)-3 , '-') + '%'
+		self.status.display( msg )
+		curses.doupdate()#}}}
+
+	##########
 	# Screen object helpers
 	##########
+
+	def initSrvlst( self ):#{{{
+		"""
+		Create status container and srvlst inside it
+		"""
+		win = curses.newwin( 0, 0 )
+		self.status = cui.statusContainer( win )
+		self.status.show()
+		self.srvlst = self.status.addWidget( cui.expandList )
+		self.initColumns()#}}}
 
 	def initColumns( self ):#{{{
 		self.column = 4
@@ -150,7 +212,10 @@ class cursow(object):
 		height, width = self.stdscr.getmaxyx()
 		self.status.resize( height, width )
 		self.tabcon.resize( height-4, width-8, 2,4)
-		self.status.display( 'ROWS: %d COLS: %d height: %d width: %d' % (curses.LINES, curses.COLS, height, width) )#}}}
+		if self.focusedWidget == self.srvlst:
+			self.srvlst.display()
+		else:
+			self.tabcon.display()#}}}
 
 	##########
 	# Option Wrappers
@@ -187,54 +252,54 @@ class cursow(object):
 		filt = lambda x: password(x) and instagib(x) and gametype(x) and mod(x)
 		self.srvlst.setFilter( filt )#}}}
 
-	def queryMasters(self):#{{{
-		if self.settings.getShowFavorites():
-			for host in self.settings.getFav():
-				self.status.display( 'Adding Favorite: %s' % (host) )
-				if self.stop:
-					return
-				self.serverips.add( host )
+	##########
+	# Input Handling
+	##########
+
+	def handleInput( self, key ):#{{{
+		"""
+		Handle a keypress
+
+		arguments
+		key -- ord(c) of key pressed
+		"""
+		if key in cui.KEY_RESIZE:
+			self.resize()
+			return
+
+		## Serverlist Control
+		if self.focusedWidget == self.srvlst:
+			if key in cui.KEY_LEFT:
+				self.navColumn( -1 )
+
+			elif key in cui.KEY_RIGHT:
+				self.navColumn( 1 )
+
+			elif key in cui.KEY_REVERSE:
+				self.srvlst.reverse()
+
+			elif key in cui.KEY_FILTER:
+				self.srvlst.pause()
+				self.tabcon.show()
+				self.menu.display()
+				self.focusedWidget = self.tabcon
+				panel.update_panels()
 				curses.doupdate()
+
+			else:
+				self.srvlst.handleInput( key )
 		else:
-			for host, port, protocol, opts  in self.settings.getMasters():
-				if self.stop:
-					return
-				try:
-					self.status.display( 'Querying Master Server: %s %d %d %s' % (host, port, protocol, opts) )
-					curses.doupdate()
-					self.serverips |= server.MasterServer( host, port=port, protocol=protocol, options=opts )
-				except:
-					continue
-		self.mainThread = threading.Thread(target=self.processServers)
-		self.mainThread.start()#}}}
-	
-	def processServer(self, ip):#{{{
-		try:
-			self.status.display( 'Querying Server: %s' % (ip) )
-			host = ip.split(':')
-			srv = server.Server( host[0], int(host[1]) )
-			srv.getstatus()
-			self.settings.addGametype( srv.gametype )
-			self.settings.addMod( srv.mod )
-			if self.settings.getPing(): srv.getPing()
-			expdata =  [ p.name for p in srv.players  ]
-			self.srvlst.addItem( srv, expdata )
-			curses.doupdate()
-		except ConnectionError as err:
-			self.status.display( 'Querying Server: %s' % (err) )
-			curses.doupdate()
-		return#}}}
+			if key in cui.KEY_FILTER:
+				self.tabcon.hide()
+				self.setFilters()
+				self.focusedWidget = self.srvlst
+				panel.update_panels()
+				curses.doupdate()
+				self.srvlst.unPause()
 
-	def processServers(self):#{{{
-		for ip in self.serverips:
-			if self.stop:
-				break
-			if threading.activeCount() > 5:
-				time.sleep(0.1)
-			thread = threading.Thread(target=self.processServer, args=[ip])
-			thread.start()#}}}
+			else:
+				self.tabcon.handleInput( key )#}}}
 
-	## Functions bound to keys
 	def addFav(self):#{{{
 		pass
 		#srv = self.srvlst.getServer()
@@ -270,39 +335,11 @@ class cursow(object):
 		## 	os.execv( prog, runlist )
 		## }}}
 	
-	def navigate(self, n): ## {{{
-		self.srvlst.move( n )
-		self.status.display( 'row: %d firstrow: %d height: %d items: %d' % (self.srvlst.row, self.srvlst.firstrow, self.srvlst.height, len(self.srvlst.items)) )
-		## }}}
-	
 	def navColumn(self, n): ## {{{
 		self.column = (self.column+n)%len(self.columnSorts)
 		self.srvlst.highlightColumnIndex( self.column )
 		self.srvlst.setSortKey( self.columnSorts[ self.column ] )
 		self.status.display( 'row: %d firstrow: %d height: %d items: %d' % (self.srvlst.row, self.srvlst.firstrow, self.srvlst.height, len(self.srvlst.items)) )
-		## }}}
-
-	def refresh(self): ##{{{
-		pass
-		## self.stopServers()
-		## ## Wait for stopServers
-		## while threading.activeCount() > 1:
-		## 	time.sleep(0.2)
-		## ## Clear variables and display
-		## self.stop = False
-		## self.serverips = set()
-		## self.mods = set()
-		## self.gametypes = set()
-		## self.srvlst.clear()
-		## ## Restart Server Thread
-		## self.mainThread = threading.Thread(target=self.queryMasters)
-		## self.mainThread.start()
-		## }}}
-
-	def stopServers(self): ## {{{
-		self.stop = True
-		#self.status.disp( 'Stopping active threads...' )
-		curses.doupdate()
 		## }}}
 
 	def quit(self): ## {{{

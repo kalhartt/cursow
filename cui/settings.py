@@ -266,6 +266,12 @@ class settings(object):
 			self.gametypes.append( gametypename )
 			self.gametypes = sorted( self.gametypes )#}}}
 
+	def clearGametype( self ):#{{{
+		"""
+		Clear found gametypes
+		"""
+		self.gametypes = ['all']#}}}
+
 	def getGametype(self):#{{{
 		"""
 		get current gametype filter
@@ -294,6 +300,12 @@ class settings(object):
 		if modname not in self.mods:
 			self.mods.append( modname )
 			self.mods = sorted( self.mods )#}}}
+	
+	def clearMod( self ):#{{{
+		"""
+		Clear found mods
+		"""
+		self.mod = ['all']#}}}
 
 	def getMod(self):#{{{
 		"""

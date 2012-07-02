@@ -84,6 +84,7 @@ class expandList(widget):
 		## Sort/filter function
 		self.sortkey = lambda x: True
 		self.filter = lambda x: True
+		self.reversed = False
 
 		## Item holders
 		self.columns = []
@@ -123,7 +124,7 @@ class expandList(widget):
 		if self.paused:
 			return
 
-		if not self.columns or not self.filteredItems:
+		if not self.columns:
 			self.window.move(0, 0)
 			self.window.clrtobot()
 			self.window.nooutrefresh()
@@ -381,7 +382,10 @@ class expandList(widget):
 		self.sort()#}}}
 
 	def sort( self ):#{{{
-		self.filteredItems = sorted( filter( self.filter, self.items ), key=self.sortkey )
+		"""
+		Sort items by given sortkey and filter
+		"""
+		self.filteredItems = sorted( filter( self.filter, self.items ), key=self.sortkey, reverse=self.reversed )
 		n = 0
 		while n < len( self.filteredItems ):
 			if isinstance(self.filteredItems[ n ], self.listItem) and self.filteredItems[n].expanded:
@@ -390,7 +394,15 @@ class expandList(widget):
 				n += len( expdata )
 			n += 1
 		self.maxrow = len( self.filteredItems )
+		self.clear()
 		self.display()#}}}
+
+	def reverse( self ):#{{{
+		"""
+		Reverse the sorting order
+		"""
+		self.reversed = not self.reversed
+		self.sort()#}}}
 
 	def addColumn( self, width, data, title ):#{{{
 		"""
@@ -460,8 +472,8 @@ class expandList(widget):
 		Resume printing to screen
 		and immediately repaint
 		"""
+		self.clear()
 		self.paused = False
-		self.displayItems = {}
 		self.display()#}}}
 
 	def scaleColumns(self):#{{{
