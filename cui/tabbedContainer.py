@@ -54,7 +54,9 @@ class tabbedContainer(widget):
 		self.panel.top()
 		self.panel.show()
 		self.tabWidgets[ self.tab ].show()
-		self.display()#}}}
+		self.display()
+		self.tabWidgets[ self.tab ].display()
+		#}}}
 
 	def display(self):#{{{
 		"""

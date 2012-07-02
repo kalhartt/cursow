@@ -362,7 +362,6 @@ class cursow(object):
 
 		self.srvlst.pause()
 		self.tabcon.show()
-		self.menu.display()
 		self.focusedWidget = self.tabcon
 		panel.update_panels()
 		curses.doupdate()#}}}
