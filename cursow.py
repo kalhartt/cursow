@@ -350,13 +350,15 @@ class cursow(object):
 	def launch(self): ## {{{
 		server = self.srvlst.getSelectedItem()
 		path, args = self.settings.getPath(), self.settings.getArgs()
+		sys.stderr.write('PATH: %s\n' % path)
+		sys.stderr.write('ARGS: %s\n' % args)
 
 		if sys.platform == 'cygwin':
 			prog = '/usr/bin/cygstart'
-			runlist = [ 'warsow', '-d', os.path.dirname(path), path, args, 'connect', '%s:%d' % (server.host, server.port) ]
+			runlist = [ 'warsow', '-d', os.path.dirname(path), path] + [ arg for arg in args.split() ] + ['connect', '%s:%d' % (server.host, server.port) ]
 		else:
 			prog = path
-			runlist = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
+			runlist = [ 'warsow' ] + [ arg for arg in args.split() ] + [ 'connect', '%s:%d' % (server.host, server.port) ]
 
 		if os.fork():
 			return
