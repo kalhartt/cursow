@@ -232,7 +232,7 @@ class menu( widget ):
 			self.move( -1 )
 		if key in KEY_DOWN:
 			self.move( 1 )
-		if key in KEY_ACTION:
+		else:
 			self.options[ self.row ].handleInput( key )
 			self.display()
 		#}}}

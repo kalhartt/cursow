@@ -72,6 +72,7 @@ class cursow(object):
 				self.tabcon.hide()
 				panel.update_panels()
 				curses.doupdate()
+				self.setFilters()
 				self.srvlst.unPause()
 
 			elif key in cui.KEY_RESIZE:
@@ -138,9 +139,10 @@ class cursow(object):
 		#self.menu.addListBox( "Show Empty", self.settings.getShowEmpty , self.settings.incShowEmpty  )
 		#self.menu.addListBox( "Show Full", self.settings.getShowFull , self.settings.incShowFull  )
 		self.menu.addLabel( "Hello There" )
+		self.setFilters()
 		#}}}
 
-	def resize( self ):
+	def resize( self ):#{{{
 		"""
 		Resize main containers, the containers
 		will resize their children
@@ -148,7 +150,42 @@ class cursow(object):
 		height, width = self.stdscr.getmaxyx()
 		self.status.resize( height, width )
 		self.tabcon.resize( height-4, width-8, 2,4)
-		self.status.display( 'ROWS: %d COLS: %d height: %d width: %d' % (curses.LINES, curses.COLS, height, width) )
+		self.status.display( 'ROWS: %d COLS: %d height: %d width: %d' % (curses.LINES, curses.COLS, height, width) )#}}}
+
+	##########
+	# Option Wrappers
+	##########
+
+	def setFilters( self ):#{{{
+		"""
+		Get filter options from settings and apply to srvlst
+		"""
+		if self.settings.getShowPassword() == 'only':
+			password = lambda x: x.password == 1
+		elif self.settings.getShowPassword() == 'hide':
+			password = lambda x: x.password == 0
+		else:
+			password = lambda x: True
+
+		if self.settings.getShowInstagib() == 'only':
+			instagib = lambda x: x.instagib == 1
+		elif self.settings.getShowInstagib() == 'hide':
+			instagib = lambda x: x.instagib == 0
+		else:
+			instagib = lambda x: True
+
+		if self.settings.getGametype() == 'all':
+			gametype = lambda x: True
+		else:
+			gametype = lambda x: x.gametype == self.settings.getGametype()
+
+		if self.settings.getMod() == 'all':
+			mod = lambda x: True
+		else:
+			mod = lambda x: x.mod == self.settings.getMod()
+
+		filt = lambda x: password(x) and instagib(x) and gametype(x) and mod(x)
+		self.srvlst.setFilter( filt )#}}}
 
 	def queryMasters(self):#{{{
 		if self.settings.getShowFavorites():

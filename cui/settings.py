@@ -263,7 +263,8 @@ class settings(object):
 		"""
 		gametypename = gametype.lower()
 		if gametypename not in self.gametypes:
-			self.gametypes.append( gametypename )#}}}
+			self.gametypes.append( gametypename )
+			self.gametypes = sorted( self.gametypes )#}}}
 
 	def getGametype(self):#{{{
 		"""
@@ -291,7 +292,8 @@ class settings(object):
 		"""
 		modname = mod.lower()
 		if modname not in self.mods:
-			self.mods.append( modname )#}}}
+			self.mods.append( modname )
+			self.mods = sorted( self.mods )#}}}
 
 	def getMod(self):#{{{
 		"""
