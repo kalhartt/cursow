@@ -34,10 +34,17 @@ class cursow(object):
 		self.mainThread.start()
 
 		## Main Loop
+		## Must catch any quit-key here
+		## Others handled in self.handleInput
 		while True:
 			key = self.stdscr.getch()
 
 			if key in cui.KEY_QUIT:
+				self.quit()
+				break
+
+			if key in cui.KEY_LAUNCH and self.focusedWidget == self.srvlst:
+				self.launch()
 				self.quit()
 				break
 
@@ -91,24 +98,42 @@ class cursow(object):
 		self.mainThread.start()#}}}
 	
 	def processServer(self, ip):#{{{
+		"""
+		Try to get/parse a status response from a server
+
+		arguments:
+		ip -- ip:port string of server
+		"""
 		try:
+			## Create Server Object
 			host = ip.split(':')
 			srv = server.Server( host[0], int(host[1]) )
+
+			## Get Server information
 			srv.getstatus()
-			self.settings.addGametype( srv.gametype )
-			self.settings.addMod( srv.mod )
 			if self.settings.getPing(): srv.getPing()
+
+			## Update others with new information
 			expdata =  [ p.name for p in srv.players  ]
 			self.srvlst.addItem( srv, expdata )
-			curses.doupdate()
+			self.settings.addGametype( srv.gametype )
+			self.settings.addMod( srv.mod )
+
+			## Update progress bar
 			self.processedServers += 1
 			self.printProcessStatus()
+
 		except ConnectionError:
+			## probably timed out, forget it
 			self.processedServers += 1
 			self.printProcessStatus()
-		return#}}}
+
+		curses.doupdate()#}}}
 
 	def processServers(self):#{{{
+		"""
+		Spawn a process thread for every found server
+		"""
 		for ip in self.serverips:
 			if self.stop:
 				break
@@ -118,9 +143,12 @@ class cursow(object):
 			thread.start()#}}}
 
 	def stopServers(self): ## {{{
+		"""
+		Signals threads to stop and waits until all threads stopped
+		"""
 		self.stop = True
-		#self.status.disp( 'Stopping active threads...' )
-		curses.doupdate()
+		while threading.activeCount() > 1:
+			time.sleep(0.2)
 		## }}}
 
 	def printProcessStatus( self ):#{{{
@@ -133,8 +161,7 @@ class cursow(object):
 		msg = '%d/%d' % ( self.processedServers, self.totalServers )
 		w2 = int( float( w-len(msg)-3 ) * self.processedServers / self.totalServers )
 		msg = msg + ' %' + ('='*w2).ljust( w-len(msg)-3 , '-') + '%'
-		self.status.display( msg )
-		curses.doupdate()#}}}
+		self.status.display( msg )#}}}
 
 	##########
 	# Screen object helpers
@@ -269,7 +296,13 @@ class cursow(object):
 
 		## Serverlist Control
 		if self.focusedWidget == self.srvlst:
-			if key in cui.KEY_LEFT:
+			if key in cui.KEY_ADDFAV:
+				self.addFav()
+
+			elif key in cui.KEY_DELFAV:
+				self.delFav()
+
+			elif key in cui.KEY_LEFT:
 				self.navColumn( -1 )
 
 			elif key in cui.KEY_RIGHT:
@@ -301,52 +334,46 @@ class cursow(object):
 				self.tabcon.handleInput( key )#}}}
 
 	def addFav(self):#{{{
-		pass
-		#srv = self.srvlst.getServer()
-		#self.settings.addFav( '%s:%d' % ( srv.host , srv.port ) )#}}}
+		"""
+		Add selected server to favorites list
+		"""
+		srv = self.srvlst.getSelectedItem()
+		self.settings.addFav( '%s:%d' % ( srv.host , srv.port ) )#}}}
 	
 	def delFav(self):#{{{
-		pass
-		#srv = self.srvlst.getServer()
-		#self.settings.delFav( '%s:%d' % ( srv.host , srv.port ) )#}}}
+		"""
+		Delete selected item from favorites list
+		"""
+		srv = self.srvlst.getSelectedItem()
+		self.settings.delFav( '%s:%d' % ( srv.host , srv.port ) )#}}}
 
 	def launch(self): ## {{{
-		pass
-		##server = self.srvlst.getServer()
-		## path, args = self.settings.getPath()
+		server = self.srvlst.getSelectedItem()
+		path, args = self.settings.getPath(), self.settings.getArgs()
 
-		## if sys.platform == 'cygwin':
-		## 	prog = '/usr/bin/cygstart'
-		## 	runlist = [ 'warsow', '-d', os.path.dirname(path), path, args, 'connect', '%s:%d' % (server.host, server.port) ]
-		## else:
-		## 	prog = path
-		## 	runlimt = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
+		if sys.platform == 'cygwin':
+			prog = '/usr/bin/cygstart'
+			runlist = [ 'warsow', '-d', os.path.dirname(path), path, args, 'connect', '%s:%d' % (server.host, server.port) ]
+		else:
+			prog = path
+			runlist = [ 'warsow', args, 'connect', '%s:%d' % (server.host, server.port) ]
 
-		## if os.fork():
-		## 	self.stop = True
-		## 	self.settings.writeCfg()
-		## 	self.status.disp( 'Stopping active threads...' )
-		## 	curses.doupdate()
-		## 	while threading.activeCount() > 1:
-		## 		time.sleep(0.2)
-		## 	return
-		## else:
-		## 	os.setsid()
-		## 	os.execv( prog, runlist )
-		## }}}
+		if os.fork():
+			return
+		else:
+			os.setsid()
+			os.execv( prog, runlist )
+		#}}}
 	
 	def navColumn(self, n): ## {{{
 		self.column = (self.column+n)%len(self.columnSorts)
 		self.srvlst.highlightColumnIndex( self.column )
 		self.srvlst.setSortKey( self.columnSorts[ self.column ] )
-		self.status.display( 'row: %d firstrow: %d height: %d items: %d' % (self.srvlst.row, self.srvlst.firstrow, self.srvlst.height, len(self.srvlst.items)) )
 		## }}}
 
 	def quit(self): ## {{{
-		self.stopServers()
 		self.settings.writeCfg()
-		while threading.activeCount() > 1:
-			time.sleep(0.2)
+		self.stopServers()
 		## }}}
 
 if __name__ == '__main__':

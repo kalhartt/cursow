@@ -49,7 +49,7 @@ class Server(object): ##{{{
 	def __init__(self, host, port, filter_colors=False): ##{{{
 		"""Create empty record with lots of None fields."""
 		# meta information before connect
-		self.connection = connection.Connection(host, port, retries=1)
+		self.connection = connection.Connection(host, port, retries=3)
 		self.filter = filter_colors
 		self.host = host
 		self.port = port
