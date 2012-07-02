@@ -162,9 +162,12 @@ class expandList(widget):
 				w = self.width - 4
 				self.printColor( y, 3, listItem, w, mode )
 
-		if self.maxrow-self.firstrow+1 < self.height:
-			self.window.move( self.maxrow-self.firstrow+1, 0 )
-			self.window.clrtobot()
+		y = self.maxrow - self.firstrow + 1
+		while y < self.height:
+			## self.window.clrtobot() wasn't working for me
+			## TODO investigate this
+			self.printColor( y, 1, '')
+			y += 1
 
 		self.window.nooutrefresh()#}}}
 
@@ -386,6 +389,7 @@ class expandList(widget):
 				self.filteredItems = self.filteredItems[:n+1] + expdata + self.filteredItems[n+1:]
 				n += len( expdata )
 			n += 1
+		self.maxrow = len( self.filteredItems )
 		self.display()#}}}
 
 	def addColumn( self, width, data, title ):#{{{
