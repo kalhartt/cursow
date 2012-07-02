@@ -129,6 +129,63 @@ class menu( widget ):
 				self.setValue( not self.getValue() )#}}}
 		#}}}
 
+	class listBox( object ):#{{{
+		"""
+		Switch through multiple settings
+		"""
+
+		def __init__( self, window, title, getValue, incValue ):#{{{
+			"""
+			Construct toggler
+
+			arguments:
+			window -- display window
+			title -- string to show
+			getValue -- function returning current value
+			incValue -- function incrementing value by amount n
+			"""
+			self.window = window
+			self.title = title
+			self.getValue = getValue
+			self.incValue = incValue
+			self.focused = False#}}}
+
+		def display( self, y, x, width ):#{{{
+			"""
+			Draws the option on screen
+
+			arguments:
+			y -- row number to draw on
+			x -- column to begin printing on
+			width -- maximum allowable width
+			"""
+			if width < 5:
+				return
+			
+			msg = self.title + ': ' + self.getValue()
+
+			if self.focused:
+				mode = curses.A_REVERSE
+			else:
+				mode = curses.A_NORMAL
+
+			self.window.addstr( y, x, msg[:width].ljust( width ), mode )#}}}
+
+		def handleInput(self, key):#{{{
+			"""
+			handle key input
+
+			arguments:
+			key -- ord(ch) of key pressed
+			"""
+			if key in KEY_LEFT:
+				self.incValue(-1)
+			elif key in KEY_RIGHT:
+				self.incValue(1)
+			elif key in KEY_LAUNCH or key in KEY_ACTION:
+				self.incValue(1)#}}}
+		#}}}
+
 	##########
 	# Main Widget
 	##########
@@ -227,7 +284,7 @@ class menu( widget ):
 		self.options.append( label )
 		self.maxrow += 1#}}}
 
-	def addToggleOption( self, title, getValue, setValue ):#{{{
+	def addToggle( self, title, getValue, setValue ):#{{{
 		"""
 		Frontend to Construct and add a toggle option
 
@@ -238,4 +295,17 @@ class menu( widget ):
 		"""
 		toggle = self.toggle( self.window, title, getValue, setValue )
 		self.options.append( toggle )
+		self.maxrow += 1#}}}
+
+	def addListBox( self, title, getValue, incValue ):#{{{
+		"""
+		Frontend to Construct and add a toggle option
+
+		arguments:
+		title -- displayed string
+		getValue -- function returning string representing value
+		incValue -- function incrementing value by n
+		"""
+		listBox = self.listBox( self.window, title, getValue, incValue )
+		self.options.append( listBox )
 		self.maxrow += 1#}}}

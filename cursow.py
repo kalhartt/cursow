@@ -86,7 +86,8 @@ class cursow(object):
 	##########
 	# Screen object helpers
 	##########
-	def initColumns( self ):
+
+	def initColumns( self ):#{{{
 		self.column = 4
 		self.columnNames = [ 'i', 'p', 'png', 'plyrs', 'map', 'mod', 'gametype', 'name' ]
 		self.columnDisps = [
@@ -115,21 +116,29 @@ class cursow(object):
 			if w < 0: w = -w / float( totalwidth )
 			self.srvlst.addColumn( w, self.columnDisps[n], self.columnNames[n] )
 		self.srvlst.highlightColumnIndex( self.column )
-		self.srvlst.setSortKey( self.columnSorts[ self.column ] )
+		self.srvlst.setSortKey( self.columnSorts[ self.column ] )#}}}
 
-	def initMenus( self ):
+	def initMenus( self ):#{{{
 		"""
 		Helper to make menus
 		"""
 		## Make tabbed container
 		self.tabwin = curses.newwin( curses.LINES-4, curses.COLS-8, 2,4)
 		self.tabcon = cui.tabbedContainer( self.tabwin )
-		self.menu = self.tabcon.addWidget( 'Menu1', cui.menu )
-		self.menu.addLabel( "Hello There" )
-		self.test = False
-		self.menu.addToggleOption( "test", self.getTest, self.setTest  )
 
-		pass
+		## Make filter menu
+		self.menu = self.tabcon.addWidget( 'Filters', cui.menu )
+		self.menu.addListBox( "Game", self.settings.getGame , self.settings.incGame )
+		self.menu.addToggle( "Ping Servers", self.settings.getPing, self.settings.setPing  )
+		self.menu.addToggle( "Show Favorites", self.settings.getShowFavorites , self.settings.setShowFavorites )
+		self.menu.addListBox( "Show Password", self.settings.getShowPassword , self.settings.incShowPassword  )
+		self.menu.addListBox( "Show Instagib", self.settings.getShowInstagib , self.settings.incShowInstagib  )
+		self.menu.addListBox( "Gametype", self.settings.getGametype , self.settings.incGametype )
+		self.menu.addListBox( "Mod", self.settings.getMod , self.settings.incMod )
+		#self.menu.addListBox( "Show Empty", self.settings.getShowEmpty , self.settings.incShowEmpty  )
+		#self.menu.addListBox( "Show Full", self.settings.getShowFull , self.settings.incShowFull  )
+		self.menu.addLabel( "Hello There" )
+		#}}}
 
 	def resize( self ):
 		"""
@@ -141,14 +150,8 @@ class cursow(object):
 		self.tabcon.resize( height-4, width-8, 2,4)
 		self.status.display( 'ROWS: %d COLS: %d height: %d width: %d' % (curses.LINES, curses.COLS, height, width) )
 
-	def getTest(self):
-		return self.test
-
-	def setTest(self, x ):
-		self.test = x
-	
 	def queryMasters(self):#{{{
-		if self.settings.showFavorites():
+		if self.settings.getShowFavorites():
 			for host in self.settings.getFav():
 				self.status.display( 'Adding Favorite: %s' % (host) )
 				if self.stop:
@@ -174,6 +177,8 @@ class cursow(object):
 			host = ip.split(':')
 			srv = server.Server( host[0], int(host[1]) )
 			srv.getstatus()
+			self.settings.addGametype( srv.gametype )
+			self.settings.addMod( srv.mod )
 			if self.settings.getPing(): srv.getPing()
 			expdata =  [ p.name for p in srv.players  ]
 			self.srvlst.addItem( srv, expdata )
