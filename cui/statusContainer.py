@@ -25,6 +25,8 @@ class statusContainer(widget):
 		"""
 		super( statusContainer, self ).__init__( window )
 		self.subwindow = None
+		self.message = ''
+		self.mode = curses.A_NORMAL
 		self.widget = None#}}}
 
 	def hide( self ):#{{{
@@ -71,21 +73,13 @@ class statusContainer(widget):
 			( h, w, y, x ) = self.getSubwinDimensions()
 			self.widget.resize( h, w, y, x )#}}}
 
-	def display( self, message, x=0, width=None, mode=curses.A_NORMAL ):#{{{
+	def display( self ):#{{{
 		"""
 		Draw a status message at the given position with given properties
 		defaults to writing rest of line with normal mode
-
-		arguments:
-		message -- string to be displayed
-		x -- horizontal position of message (relative to widget window) (default = 0)
-		width -- printing width allotted to message (default = self.width)
-		mode -- display mode (default = curses.A_NORMAL)
 		"""
-		if width == None: width = self.width-1
-		if x + width >= self.width:
-			width = self.width - x - 1
-		self.window.addstr( self.height-1, x, message[:width].ljust(width), mode )
+		width = self.width - 1
+		self.window.addstr( self.height-1, 0, self.message[:width].ljust(width), self.mode )
 		self.window.nooutrefresh()#}}}
 
 	def clear( self ):#{{{
@@ -142,3 +136,22 @@ class statusContainer(widget):
 		Get the subwidget of the container
 		"""
 		return self.widget#}}}
+
+	def setMessage(self, message, mode=None):#{{{
+		"""
+		Set status container message
+
+		arguments:
+		message -- mesage to display
+		mode -- curses mode to display with
+		"""
+		self.message = message
+		if mode != None:
+			self.mode = mode
+		self.display()#}}}
+	
+	def getMessage(self):#{{{
+		"""
+		get current message
+		"""
+		return self.message#}}}

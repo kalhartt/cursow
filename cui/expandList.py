@@ -102,7 +102,7 @@ class expandList(widget):
 		self.spacers = 2
 
 		super( expandList, self ).__init__( window )#}}}
-
+	
 	def resize(self, height, width, y0=None, x0=None):#{{{
 		"""
 		Resize and/or move the window
@@ -217,6 +217,17 @@ class expandList(widget):
 		"""
 		self.displayItems = {}
 		super( expandList , self ).clear()#}}}
+
+	def reset( self ):#{{{
+		"""
+		Empty list of items and clear window
+		"""
+		self.items = []
+		self.filteredItems = []
+		self.row = 0
+		self.firstrow = 0
+		self.maxrow = 0
+		self.clear()#}}}
 
 	def handleInput( self, key ):#{{{
 		"""
@@ -394,7 +405,6 @@ class expandList(widget):
 				n += len( expdata )
 			n += 1
 		self.maxrow = len( self.filteredItems )
-		self.clear()
 		self.display()#}}}
 
 	def reverse( self ):#{{{

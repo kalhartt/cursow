@@ -16,12 +16,8 @@ class cursow(object):
 		cui.color.setColor()
 		self.stdscr = screen
 		self.stdscr.keypad(1)
-		
-		## Needed variables
-		self.stop = False
-		self.serverips = set()
-		self.settings = cui.settings()
 
+		self.settings = cui.settings()
 		self.initSrvlst()
 		self.initMenus()
 		self.focusedWidget = self.srvlst
@@ -29,13 +25,9 @@ class cursow(object):
 		panel.update_panels()
 		curses.doupdate()
 
-		## Import servers
-		self.mainThread = threading.Thread(target=self.queryMasters)
-		self.mainThread.start()
+		self.startQuery()
 
-		## Main Loop
-		## Must catch any quit-key here
-		## Others handled in self.handleInput
+		## Main Loop -- have to catch all quit events here
 		while True:
 			key = self.stdscr.getch()
 
@@ -57,27 +49,24 @@ class cursow(object):
 	# Server Control
 	##########
 
-	def startQuery(self): ##{{{
-		pass
-		## self.stopServers()
-		## ## Wait for stopServers
-		## while threading.activeCount() > 1:
-		## 	time.sleep(0.2)
-		## ## Clear variables and display
-		## self.stop = False
-		## self.serverips = set()
-		## self.mods = set()
-		## self.gametypes = set()
-		## self.srvlst.clear()
-		## ## Restart Server Thread
-		## self.mainThread = threading.Thread(target=self.queryMasters)
-		## self.mainThread.start()
-		## }}}
+	def startQuery(self):#{{{
+		"""
+		Stop current server threads and restart query process
+		"""
+		self.stopServers()
+
+		self.stop = False
+		self.serverips = set()
+		self.settings.clearGametype()
+		self.settings.clearMod()
+		self.srvlst.reset()
+		self.mainThread = threading.Thread(target=self.queryMasters)
+		self.mainThread.start()#}}}
 	
 	def queryMasters(self):#{{{
 		if self.settings.getShowFavorites():
 			for host in self.settings.getFav():
-				self.status.display( 'Adding Favorite: %s' % (host) )
+				self.status.setMessage( 'Adding Favorite: %s' % (host) )
 				if self.stop:
 					return
 				self.serverips.add( host )
@@ -87,7 +76,7 @@ class cursow(object):
 				if self.stop:
 					return
 				try:
-					self.status.display( 'Querying Master Server: %s %d %d %s' % (host, port, protocol, opts) )
+					self.status.setMessage( 'Querying Master Server: %s %d %d %s' % (host, port, protocol, opts) )
 					curses.doupdate()
 					self.serverips |= server.MasterServer( host, port=port, protocol=protocol, options=opts )
 				except:
@@ -161,7 +150,7 @@ class cursow(object):
 		msg = '%d/%d' % ( self.processedServers, self.totalServers )
 		w2 = int( float( w-len(msg)-3 ) * self.processedServers / self.totalServers )
 		msg = msg + ' %' + ('='*w2).ljust( w-len(msg)-3 , '-') + '%'
-		self.status.display( msg )#}}}
+		self.status.setMessage( msg )#}}}
 
 	##########
 	# Screen object helpers
@@ -227,8 +216,20 @@ class cursow(object):
 		self.menu.addListBox( "Mod", self.settings.getMod , self.settings.incMod )
 		#self.menu.addListBox( "Show Empty", self.settings.getShowEmpty , self.settings.incShowEmpty  )
 		#self.menu.addListBox( "Show Full", self.settings.getShowFull , self.settings.incShowFull  )
-		self.menu.addLabel( "Hello There" )
 		self.setFilters()
+
+		## Make Column Toggler
+		self.colMenu = self.tabcon.addWidget( 'Columns', cui.menu )
+		self.colMenu.addLabel( 'Keyboard Shortcuts', just='center' )
+
+		## Make Friends List
+		self.friendMenu = self.tabcon.addWidget( 'Friends', cui.menu )
+		self.friendMenu.addLabel( 'Keyboard Shortcuts', just='center' )
+
+		## Make Help menu
+		self.helpMenu = self.tabcon.addWidget( 'Help', cui.menu )
+		self.helpMenu.addLabel( 'Keyboard Shortcuts', just='center' )
+
 		#}}}
 
 	def resize( self ):#{{{
@@ -311,27 +312,45 @@ class cursow(object):
 			elif key in cui.KEY_REVERSE:
 				self.srvlst.reverse()
 
-			elif key in cui.KEY_FILTER:
-				self.srvlst.pause()
-				self.tabcon.show()
-				self.menu.display()
-				self.focusedWidget = self.tabcon
-				panel.update_panels()
-				curses.doupdate()
+			elif key in cui.KEY_MENU:
+				self.showMenu()
 
 			else:
 				self.srvlst.handleInput( key )
 		else:
-			if key in cui.KEY_FILTER:
-				self.tabcon.hide()
-				self.setFilters()
-				self.focusedWidget = self.srvlst
-				panel.update_panels()
-				curses.doupdate()
-				self.srvlst.unPause()
+			if key in cui.KEY_MENU:
+				self.hideMenu()
 
 			else:
 				self.tabcon.handleInput( key )#}}}
+	
+	def showMenu( self ):#{{{
+		"""
+		Remember current state and show menu
+		"""
+		self.oldGame = self.settings.getGame()
+		self.oldFavs = self.settings.getShowFavorites()
+
+		self.srvlst.pause()
+		self.tabcon.show()
+		self.menu.display()
+		self.focusedWidget = self.tabcon
+		panel.update_panels()
+		curses.doupdate()#}}}
+	
+	def hideMenu( self ):#{{{
+		"""
+		Check if requery needed and hide menu
+		"""
+		if self.oldGame != self.settings.getGame() or self.oldFavs != self.settings.getShowFavorites():
+			self.startQuery()
+
+		self.tabcon.hide()
+		self.setFilters()
+		self.focusedWidget = self.srvlst
+		panel.update_panels()
+		curses.doupdate()
+		self.srvlst.unPause()#}}}
 
 	def addFav(self):#{{{
 		"""

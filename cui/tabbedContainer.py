@@ -3,6 +3,7 @@ import curses
 from curses import panel
 from .widget import widget
 from .common import *
+import sys
 
 class tabbedContainer(widget):
 	"""
@@ -149,8 +150,9 @@ class tabbedContainer(widget):
 		"""
 		if n == 0:
 			return
-		self.tabWidget[ self.tab ].hide()
-		self.tab = (self.tab+n)%len(self.tabNames)#}}}
+		self.tabWidgets[ self.tab ].hide()
+		self.tab = (self.tab+n)%len(self.tabNames)
+		self.tabWidgets[ self.tab ].show()#}}}
 
 	def focus(self):#{{{
 		"""
@@ -173,10 +175,13 @@ class tabbedContainer(widget):
 		arguments:
 		key -- ord(key) of the pressed key
 		"""
-		if key == KEY_TABNEXT:
+		sys.stderr.write( 'Handling key input' )
+		if key in KEY_TABNEXT:
+			sys.stderr.write( 'Handling Tabnext' )
 			self.navigate( 1 )
 			return
-		if key == KEY_TABPREV:
+		if key in KEY_TABPREV:
+			sys.stderr.write( 'Handling prev' )
 			self.navigate( -1 )
 			return
 		if self.tabWidgets:

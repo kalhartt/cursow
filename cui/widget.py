@@ -35,6 +35,7 @@ class widget( object ):
 		"""
 		if not self.visible:
 			return
+		self.visible = False
 		self.panel.bottom()
 		self.panel.hide()#}}}
 
@@ -45,6 +46,7 @@ class widget( object ):
 		"""
 		if self.visible:
 			return
+		self.visible = True
 		self.panel.top()
 		self.panel.show() #}}}
 
