@@ -3,7 +3,6 @@ import curses
 from curses import panel
 from .widget import widget
 from .common import *
-import sys
 
 class menu( widget ):
 	"""
@@ -279,13 +278,11 @@ class menu( widget ):
 					self.moveRight()
 
 				elif key == curses.KEY_HOME:
-					sys.stderr.write( 'Move to Home\n' )
 					self.pos = 0
 					self.firstpos = 0
 					self.focusDisplay()
 
 				elif key == curses.KEY_END:
-					sys.stderr.write( 'Move to End\n' )
 					self.pos = len( self.message )
 					self.firstpos = len( self.message ) - self.width + len( self.label ) + 1
 					if self.firstpos <= 0: self.firstpos = 0
@@ -294,29 +291,23 @@ class menu( widget ):
 				elif key == curses.KEY_BACKSPACE or key == 127:
 					if self.pos == len( self.message ) and self.firstpos > 0:
 						self.firstpos -= 1
-					sys.stderr.write( 'Backspace Character\n' )
 					self.message = self.message[:self.pos-1] + self.message[self.pos:]
 					self.pos -= 1
 					if self.pos < 0: self.pos = 0
 					self.focusDisplay()
 
 				elif key == curses.KEY_DC:
-					sys.stderr.write( 'Deleting Character\n' )
 					self.message = self.message[:self.pos] + self.message[self.pos+1:]
 					if self.pos > len( self.message ): self.pos = len(self.message)
 					self.focusDisplay()
 
 				elif key == curses.KEY_ENTER or key == ord( '\n' ):
-					sys.stderr.write( 'Setting input mode OFF\n' )
 					break
 
 				elif key in range(32, 255):
-					sys.stderr.write( 'Adding Character %s\n' % chr(key) )
 					self.message += chr(key) 
 					self.moveRight()
 				
-				sys.stderr.write('\n')
-
 			self.setValue( self.message )
 			self.display( self.y, self.x, self.width )#}}}
 
@@ -352,7 +343,6 @@ class menu( widget ):
 			
 			self.pos += 1
 			overflow = self.pos - self.firstpos + 1 - self.width + len( self.label )
-			sys.stderr.write( 'Overflow %d\n' % overflow )
 			if overflow > 0:
 				self.firstpos += overflow
 				self.focusDisplay()
