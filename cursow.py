@@ -3,6 +3,7 @@ import curses, threading, time, os, sys
 from curses import panel
 
 import cui
+from settings import settings
 from net import *
 from net import ConnectionError
 
@@ -15,7 +16,7 @@ class cursow(object):
 		self.stdscr = screen
 		self.stdscr.keypad(1)
 
-		self.settings = cui.settings()
+		self.settings = settings()
 		self.initSrvlst()
 		self.initMenus()
 		self.focusedWidget = self.srvlst

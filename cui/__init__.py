@@ -3,17 +3,11 @@ __all__ = [
 	'color',
 	'columnList',
 	'common',
-	'expColumnList',
+	'expandList',
 	'menu',
-	'settings',
-	'panFilter',
-	'panFriends',
-	'panOptions',
 	'statusContainer',
 	'tabbedContainer',
 	'widget',
-	'widSrvlst',
-	'widStatus',
 	]
 
 import color
