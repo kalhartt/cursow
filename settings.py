@@ -17,6 +17,8 @@ class settings(object):
 
 	gendefaults = {#{{{
 			'Game' : 'Warsow 0.6',
+			'Empty' : 'show',
+			'Full' : 'show',
 			'Ping Servers' : 'true',
 			'Show Favorites' : 'false',
 			'Instagib' : 'show',
@@ -196,6 +198,48 @@ class settings(object):
 		"""
 		value = str( value )
 		self.cp.set( 'General', 'Ping Servers', value )#}}}
+
+	def getShowEmpty(self):#{{{
+		"""
+		Get whether or not to ping servers
+		"""
+		return self.cp.get( 'General', 'Empty' )#}}}
+
+	def incShowEmpty(self, n):#{{{
+		"""
+		Set whether or not to ping servers
+
+		arguments:
+		n -- amount to increment by
+		"""
+		value = self.cp.get( 'General', 'Empty' )
+		options = [ 'show', 'hide', 'only' ]
+		try:
+			index = (options.index( value.lower() )+n)%3
+		except ValueError:
+			index = 0
+		self.cp.set( 'General', 'Empty', options[index] )#}}}
+
+	def getShowFull(self):#{{{
+		"""
+		Get whether or not to ping servers
+		"""
+		return self.cp.get( 'General', 'Full' )#}}}
+
+	def incShowFull(self, n):#{{{
+		"""
+		Set whether or not to ping servers
+
+		arguments:
+		n -- amount to increment by
+		"""
+		value = self.cp.get( 'General', 'Full' )
+		options = [ 'show', 'hide', 'only' ]
+		try:
+			index = (options.index( value.lower() )+n)%3
+		except ValueError:
+			index = 0
+		self.cp.set( 'General', 'Full', options[index] )#}}}
 
 	def getShowFavorites(self):#{{{
 		"""

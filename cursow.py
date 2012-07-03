@@ -209,22 +209,27 @@ class cursow(object):
 		self.menu.addListBox( "Game", self.settings.getGame , self.settings.incGame )
 		self.menu.addToggle( "Ping Servers", self.settings.getPing, self.settings.setPing  )
 		self.menu.addToggle( "Show Favorites", self.settings.getShowFavorites , self.settings.setShowFavorites )
+		self.menu.addListBox( "Show Empty", self.settings.getShowEmpty , self.settings.incShowEmpty  )
+		self.menu.addListBox( "Show Full", self.settings.getShowFull , self.settings.incShowFull  )
 		self.menu.addListBox( "Show Password", self.settings.getShowPassword , self.settings.incShowPassword  )
 		self.menu.addListBox( "Show Instagib", self.settings.getShowInstagib , self.settings.incShowInstagib  )
 		self.menu.addListBox( "Gametype", self.settings.getGametype , self.settings.incGametype )
 		self.menu.addListBox( "Mod", self.settings.getMod , self.settings.incMod )
-		#self.menu.addListBox( "Show Empty", self.settings.getShowEmpty , self.settings.incShowEmpty  )
-		#self.menu.addListBox( "Show Full", self.settings.getShowFull , self.settings.incShowFull  )
 		self.setFilters()
 
-		## Make Column Toggler
+		## Make Friends List
+		# TODO
+		self.friendMenu = self.tabcon.addWidget( 'Friends', cui.menu )
+		self.friendMenu.addLabel( 'Keyboard Shortcuts', just='center' )
+
+		## Make Settings List
 		self.colMenu = self.tabcon.addWidget( 'Settings', cui.menu )
 		self.colMenu.addLabel( 'Warsow 0.6', mode=curses.A_REVERSE )
 		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.6', 'Path' ), lambda x: self.settings.setOpt( 'Warsow 0.6', 'Path', x ), label = 'Path' )
-
-		## Make Friends List
-		self.friendMenu = self.tabcon.addWidget( 'Friends', cui.menu )
-		self.friendMenu.addLabel( 'Keyboard Shortcuts', just='center' )
+		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.6', 'Args' ), lambda x: self.settings.setOpt( 'Warsow 0.6', 'Args', x ), label = 'Args' )
+		self.colMenu.addLabel( 'Warsow 0.7', mode=curses.A_REVERSE )
+		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.7', 'Path' ), lambda x: self.settings.setOpt( 'Warsow 0.7', 'Path', x ), label = 'Path' )
+		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.7', 'Args' ), lambda x: self.settings.setOpt( 'Warsow 0.7', 'Args', x ), label = 'Args' )
 
 		## Make Help menu
 		# TODO - make this read from cui/common
@@ -274,6 +279,20 @@ class cursow(object):
 		"""
 		Get filter options from settings and apply to srvlst
 		"""
+		if self.settings.getShowFull() == 'only':
+			full = lambda x: x.clients == x.maxclients
+		elif self.settings.getShowFull() == 'hide':
+			full = lambda x: x.clients != x.maxclients
+		else:
+			full = lambda x: True
+
+		if self.settings.getShowEmpty() == 'only':
+			empty = lambda x: x.clients == 0
+		elif self.settings.getShowEmpty() == 'hide':
+			empty = lambda x: x.clients != 0
+		else:
+			empty = lambda x: True
+
 		if self.settings.getShowPassword() == 'only':
 			password = lambda x: x.password == 1
 		elif self.settings.getShowPassword() == 'hide':
@@ -298,7 +317,7 @@ class cursow(object):
 		else:
 			mod = lambda x: x.mod == self.settings.getMod()
 
-		filt = lambda x: password(x) and instagib(x) and gametype(x) and mod(x)
+		filt = lambda x: full(x) and empty(x) and password(x) and instagib(x) and gametype(x) and mod(x)
 		self.srvlst.setFilter( filt )#}}}
 
 	##########
@@ -405,7 +424,7 @@ class cursow(object):
 			runlist = [ 'warsow', '-d', os.path.dirname(path), path] + [ arg for arg in args.split() ] + ['connect', '%s:%d' % (server.host, server.port) ]
 		else:
 			prog = path
-			runlist = [ 'warsow' ] + [ arg for arg in args.split() ] + [ 'connect', '%s:%d' % (server.host, server.port) ]
+			runlist = [ 'warsow' ] + [ os.path.expanduser( arg ) for arg in args.split() ] + [ 'connect', '%s:%d' % (server.host, server.port) ]
 
 		if os.fork():
 			return
