@@ -218,8 +218,9 @@ class cursow(object):
 		self.setFilters()
 
 		## Make Column Toggler
-		self.colMenu = self.tabcon.addWidget( 'Columns', cui.menu )
-		self.colMenu.addLabel( 'Keyboard Shortcuts', just='center' )
+		self.colMenu = self.tabcon.addWidget( 'Settings', cui.menu )
+		self.colMenu.addLabel( 'Warsow 0.6', mode=curses.A_REVERSE )
+		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.6', 'Path' ), lambda x: self.settings.setOpt( 'Warsow 0.6', 'Path', x ), label = 'Path' )
 
 		## Make Friends List
 		self.friendMenu = self.tabcon.addWidget( 'Friends', cui.menu )

@@ -3,6 +3,7 @@ import curses
 from curses import panel
 from .widget import widget
 from .common import *
+import sys
 
 class menu( widget ):
 	"""
@@ -186,6 +187,198 @@ class menu( widget ):
 				self.incValue(1)#}}}
 		#}}}
 
+	class inputBox( object ):#{{{
+		"""
+		line input widget with optional label
+		"""
+		def __init__( self, window, getValue, setValue, label = None):#{{{
+			"""
+			Construct label
+
+			arguments:
+			window -- display window
+			getValue -- function returning string to show in input box
+			setValue -- function of string to set value to
+			label -- label shown left of inputbox (default = blank)
+			"""
+			self.window = window
+			self.label = '' if label == None else label+': '
+			self.getValue = getValue
+			self.setValue = setValue
+			self.focused = False
+
+			## Display Variables
+			self.pos = 0
+			self.firstpos = 0
+			self.message = self.getValue()
+			#}}}
+
+		def display( self, y, x, width ):#{{{
+			"""
+			Draws the inputBox on screen
+
+			arguments:
+			y -- row number to draw on
+			x -- column to begin printing on
+			width -- maximum allowable width
+			"""
+			## Remember settings
+			self.y = y
+			self.x = x
+			self.width = width
+
+			mode = curses.A_REVERSE if self.focused else curses.A_NORMAL
+			msg = self.label + self.message
+			self.window.addstr( y, x, msg[:width].ljust( width ), mode )
+			self.window.nooutrefresh()#}}}
+		
+		def focusDisplay( self ):#{{{
+			"""
+			Initial display when entering input mode
+			"""
+			msg1 = self.label + self.message[ self.firstpos:self.pos ]
+			try:
+				msg2 = self.message[ self.pos ]
+				if msg2 == '': msg2 = ' '
+			except IndexError:
+				msg2 = ' '
+			msg3 = self.message[ self.pos+1: ]
+
+			width = self.width
+			x = self.x
+			
+			self.window.addstr( self.y, x, msg1[:width], curses.A_NORMAL )
+			width -= len( msg1 )
+			x += len( msg1 )
+			if width <= 0: return
+
+			self.window.addstr( self.y, x, msg2[:width], curses.A_REVERSE )
+			width -= len( msg2 )
+			x += len( msg2 )
+			if width <= 0: return
+
+			self.window.addstr( self.y, x, msg3[:width].ljust(width), curses.A_NORMAL )
+			self.window.nooutrefresh()#}}}
+
+		def focus( self ):#{{{
+			"""
+			Focus widget and take all input
+			#TODO - fix so screen-resizes caught are sent back up
+			"""
+			self.message = self.getValue()
+			self.focusDisplay()
+
+			while True:
+				curses.doupdate()
+				key = self.window.getch()
+				
+				if key == curses.KEY_LEFT:
+					self.moveLeft()
+
+				elif key == curses.KEY_RIGHT:
+					self.moveRight()
+
+				elif key == curses.KEY_HOME:
+					sys.stderr.write( 'Move to Home\n' )
+					self.pos = 0
+					self.firstpos = 0
+					self.focusDisplay()
+
+				elif key == curses.KEY_END:
+					sys.stderr.write( 'Move to End\n' )
+					self.pos = len( self.message )
+					self.firstpos = len( self.message ) - self.width + len( self.label ) + 1
+					if self.firstpos <= 0: self.firstpos = 0
+					self.focusDisplay()
+
+				elif key == curses.KEY_BACKSPACE or key == 127:
+					if self.pos == len( self.message ) and self.firstpos > 0:
+						self.firstpos -= 1
+					sys.stderr.write( 'Backspace Character\n' )
+					self.message = self.message[:self.pos-1] + self.message[self.pos:]
+					self.pos -= 1
+					if self.pos < 0: self.pos = 0
+					self.focusDisplay()
+
+				elif key == curses.KEY_DC:
+					sys.stderr.write( 'Deleting Character\n' )
+					self.message = self.message[:self.pos] + self.message[self.pos+1:]
+					if self.pos > len( self.message ): self.pos = len(self.message)
+					self.focusDisplay()
+
+				elif key == curses.KEY_ENTER or key == ord( '\n' ):
+					sys.stderr.write( 'Setting input mode OFF\n' )
+					break
+
+				elif key in range(32, 255):
+					sys.stderr.write( 'Adding Character %s\n' % chr(key) )
+					self.message += chr(key) 
+					self.moveRight()
+				
+				sys.stderr.write('\n')
+
+			self.setValue( self.message )
+			self.display( self.y, self.x, self.width )#}}}
+
+		def moveLeft( self ):#{{{
+			"""
+			Helper function to move input left
+			"""
+			if self.pos <= 0:
+				self.pos = 0
+				return
+
+			if self.pos < self.firstpos:
+				self.firstpos = self.pos
+
+			try:
+				c1 = self.message[ self.pos ]
+			except IndexError:
+				c1 = ' '
+			c2 = self.message[ self.pos-1 ]
+			x1 = self.x + len( self.label ) + self.pos - self.firstpos
+			self.pos -= 1
+			self.window.addstr( self.y, x1, c1, curses.A_NORMAL)
+			self.window.addstr( self.y, x1-1, c2, curses.A_REVERSE)
+			#}}}
+
+		def moveRight( self ):#{{{
+			"""
+			Helper function to move input right
+			"""
+			if self.pos >= len( self.message ):
+				self.pos = len( self.message )
+				return
+			
+			self.pos += 1
+			overflow = self.pos - self.firstpos + 1 - self.width + len( self.label )
+			sys.stderr.write( 'Overflow %d\n' % overflow )
+			if overflow > 0:
+				self.firstpos += overflow
+				self.focusDisplay()
+				return
+
+			c1 = self.message[ self.pos-1 ]
+			try:
+				c2 = self.message[ self.pos ]
+			except IndexError:
+				c2 = ' '
+			x1 = self.x + len( self.label ) + self.pos - self.firstpos
+			self.window.addstr( self.y, x1-1, c1, curses.A_NORMAL)
+			self.window.addstr( self.y, x1, c2, curses.A_REVERSE)
+			#}}}
+
+		def handleInput(self, key):#{{{
+			"""
+			Handle keypress event
+
+			arguments:
+			key -- ord(c) of key pressed
+			"""
+			if key in KEY_ACTION or key in KEY_LAUNCH: self.focus() #}}}
+
+		#}}}
+
 	##########
 	# Main Widget
 	##########
@@ -228,13 +421,19 @@ class menu( widget ):
 		arguments:
 		key -- ord(c) for character pressed
 		"""
-		if key in KEY_UP:
+		if not self.options:
+			return
+
+		elif key in KEY_UP:
 			self.move( -1 )
-		if key in KEY_DOWN:
+
+		elif key in KEY_DOWN:
 			self.move( 1 )
+
 		else:
 			self.options[ self.row ].handleInput( key )
-			self.display()
+
+		self.display()
 		#}}}
 
 	def move( self, n ):#{{{
@@ -282,7 +481,8 @@ class menu( widget ):
 		"""
 		label = self.label( self.window, message, just, mode)
 		self.options.append( label )
-		self.maxrow += 1#}}}
+		self.maxrow += 1
+		return label#}}}
 
 	def addToggle( self, title, getValue, setValue ):#{{{
 		"""
@@ -295,7 +495,8 @@ class menu( widget ):
 		"""
 		toggle = self.toggle( self.window, title, getValue, setValue )
 		self.options.append( toggle )
-		self.maxrow += 1#}}}
+		self.maxrow += 1
+		return toggle#}}}
 
 	def addListBox( self, title, getValue, incValue ):#{{{
 		"""
@@ -308,4 +509,19 @@ class menu( widget ):
 		"""
 		listBox = self.listBox( self.window, title, getValue, incValue )
 		self.options.append( listBox )
-		self.maxrow += 1#}}}
+		self.maxrow += 1
+		return listBox#}}}
+	
+	def addInputBox( self, getValue, setValue, label=None ):#{{{
+		"""
+		Frontend to Construct and add a inputBox
+
+		arguments:
+		getValue -- function returning string to show in input box
+		setValue -- function of string to set value to
+		label -- displayed string before inputbox
+		"""
+		inputBox = self.inputBox( self.window, getValue, setValue, label )
+		self.options.append( inputBox )
+		self.maxrow += 1
+		return inputBox#}}}
