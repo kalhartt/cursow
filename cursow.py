@@ -227,9 +227,9 @@ class cursow(object):
 		self.colMenu.addLabel( 'Warsow 0.6', mode=curses.A_REVERSE )
 		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.6', 'Path' ), lambda x: self.settings.setOpt( 'Warsow 0.6', 'Path', x ), label = 'Path' )
 		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.6', 'Args' ), lambda x: self.settings.setOpt( 'Warsow 0.6', 'Args', x ), label = 'Args' )
-		self.colMenu.addLabel( 'Warsow 0.7', mode=curses.A_REVERSE )
-		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.7', 'Path' ), lambda x: self.settings.setOpt( 'Warsow 0.7', 'Path', x ), label = 'Path' )
-		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 0.7', 'Args' ), lambda x: self.settings.setOpt( 'Warsow 0.7', 'Args', x ), label = 'Args' )
+		self.colMenu.addLabel( 'Warsow 1.0', mode=curses.A_REVERSE )
+		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 1.0', 'Path' ), lambda x: self.settings.setOpt( 'Warsow 1.0', 'Path', x ), label = 'Path' )
+		self.colMenu.addInputBox( lambda: self.settings.getOpt( 'Warsow 1.0', 'Args' ), lambda x: self.settings.setOpt( 'Warsow 1.0', 'Args', x ), label = 'Args' )
 
 		## Make Help menu
 		# TODO - make this read from cui/common

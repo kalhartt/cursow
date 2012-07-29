@@ -51,7 +51,7 @@ class settings(object):
 		'options' : 'full empty'
 		}#}}}
 
-	games = [ 'Warsow 0.6', 'Warsow 0.7' ]
+	games = [ 'Warsow 0.6', 'Warsow 1.0' ]
 	gametypes = ['all']
 	mods = ['all']
 
@@ -83,12 +83,12 @@ class settings(object):
 		for k, v in self.wsw6defaults.items():
 			self.cp.set( 'Warsow 0.6', k, v )
 
-		self.cp.add_section( 'Warsow 0.7' )
+		self.cp.add_section( 'Warsow 1.0' )
 		for k, v in self.wsw7defaults.items():
-			self.cp.set( 'Warsow 0.7', k, v )
+			self.cp.set( 'Warsow 1.0', k, v )
 
 		self.cp.add_section( 'Favorites Warsow 0.6' )
-		self.cp.add_section( 'Favorites Warsow 0.7' )
+		self.cp.add_section( 'Favorites Warsow 1.0' )
 		self.cp.add_section( 'Friends' )
 
 		self.writeCfg()#}}}
