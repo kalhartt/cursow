@@ -421,10 +421,16 @@ class cursow(object):
 
 		if sys.platform == 'cygwin':
 			prog = '/usr/bin/cygstart'
-			runlist = [ 'warsow', '-d', os.path.dirname(path), path] + [ arg for arg in args.split() ] + ['connect', '%s:%d' % (server.host, server.port) ]
+			runlist = [ 'warsow', '-d', os.path.dirname(path), path] + [ arg for arg in args.split() ]
+			if server.mod != '':
+				runlist.extend( ['+set', 'fs_game', server.mod] )
+			runlist.extend( ['connect', '%s:%d' % (server.host, server.port) ] )
 		else:
 			prog = path
-			runlist = [ 'warsow' ] + [ os.path.expanduser( arg ) for arg in args.split() ] + [ 'connect', '%s:%d' % (server.host, server.port) ]
+			runlist = [ 'warsow' ] + [ os.path.expanduser( arg ) for arg in args.split() ]
+			if server.mod != '':
+				runlist.extend( ['+set', 'fs_game', server.mod] )
+			runlist.extend( ['connect', '%s:%d' % (server.host, server.port) ] )
 
 		if os.fork():
 			return
