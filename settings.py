@@ -27,7 +27,7 @@ class settings(object):
 			'Mod' : 'all',
 			}#}}}
 
-	wsw6defaults = {#{{{
+	wsw06defaults = {#{{{
 		'path' : '/opt/warsow/warsow',
 		'args' : '',
 		'master1' : 'dpmaster.deathmask.net',
@@ -39,7 +39,7 @@ class settings(object):
 		'options' : 'full empty'
 		}#}}}
 
-	wsw7defaults = {#{{{
+	wsw10defaults = {#{{{
 		'path' : '/opt/warsow/warsow',
 		'args' : '',
 		'master1' : 'dpmaster.deathmask.net',
@@ -47,7 +47,7 @@ class settings(object):
 		#'master3' : 'excalibur.nvg.ntnu.no',
 		#'master4' : 'eu.master.warsow.net',
 		'port' : '27950',
-		'protocol' : '6094',
+		'protocol' : '15',
 		'options' : 'full empty'
 		}#}}}
 
@@ -80,11 +80,11 @@ class settings(object):
 			self.cp.set( 'General', k, v )
 
 		self.cp.add_section( 'Warsow 0.6' )
-		for k, v in self.wsw6defaults.items():
+		for k, v in self.wsw06defaults.items():
 			self.cp.set( 'Warsow 0.6', k, v )
 
 		self.cp.add_section( 'Warsow 1.0' )
-		for k, v in self.wsw7defaults.items():
+		for k, v in self.wsw10defaults.items():
 			self.cp.set( 'Warsow 1.0', k, v )
 
 		self.cp.add_section( 'Favorites Warsow 0.6' )
