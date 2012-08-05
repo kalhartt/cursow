@@ -460,6 +460,14 @@ class menu( widget ):
 
 		self.display()#}}}
 
+	def clearWidgets( self ):#{{{
+		"""
+		Delete all added widgets and
+		clear the display
+		"""
+		self.options = []
+		self.clear()#}}}
+
 	def addLabel( self, message, just = None, mode = None ):#{{{
 		"""
 		Frontend to Construct and add a label
